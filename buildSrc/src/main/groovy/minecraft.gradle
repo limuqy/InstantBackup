@@ -1,0 +1,46 @@
+plugins {
+    id 'common'
+    id 'xyz.wagyourtail.unimined'
+}
+
+unimined.minecraft(sourceSets.main, true) {
+    version gradle.ext.minecraft_version
+
+    mappings {
+        mojmap()
+    }
+}
+
+if (project.name == "common") return // Don't apply the code below to the common project
+
+unimined.minecraft(sourceSets.main, true) {
+    mods.modImplementation {
+        mixinRemap {
+            enableBaseMixin()
+            enableMixinExtra()
+        }
+    }
+}
+
+dependencies {
+    implementation(project(":common"))
+    implementation(project(":core"))
+}
+
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from project(":common").sourceSets.main.resources
+    from project(":core").sourceSets.main.resources
+}
+
+tasks.withType(JavaCompile).configureEach {
+    if (name == "compileJava") {
+        source(project(":common").sourceSets.main.allSource)
+    }
+}
+
+tasks.named('jar').configure {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(project(':core').sourceSets.main.output)
+    from(project(':cli').sourceSets.main.output)
+}

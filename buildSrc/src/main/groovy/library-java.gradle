@@ -1,0 +1,8 @@
+def javaVer = gradle.ext.java_version.toInteger()
+java {
+    sourceCompatibility = JavaVersion.toVersion(javaVer)
+    targetCompatibility = JavaVersion.toVersion(javaVer)
+}
+tasks.withType(JavaCompile).configureEach {
+    options.release = javaVer
+}

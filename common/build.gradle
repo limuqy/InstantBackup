@@ -1,0 +1,12 @@
+plugins {
+    id 'unimined-common'
+    id 'java-library'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api project(':core')
+}

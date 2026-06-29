@@ -1,0 +1,31 @@
+plugins {
+    id 'application'
+    id 'com.gradleup.shadow' version '8.3.5'
+}
+
+group = rootProject.group
+version = mod_version
+
+apply from: "${rootDir}/buildSrc/src/main/groovy/library-java.gradle"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':core')
+}
+
+application {
+    mainClass = 'io.github.limuqy.mc.backup.cli.CliMain'
+}
+
+tasks.named('shadowJar') {
+    archiveBaseName.set('instantbackup-cli')
+    archiveClassifier.set('all')
+    mergeServiceFiles()
+}
+
+tasks.named('build') {
+    dependsOn shadowJar
+}

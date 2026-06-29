@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- 背景渐变 -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a3a2a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d1f15;stop-opacity:1" />
+    </linearGradient>
+    <!-- 金属高光 -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffdd57;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#e8b830;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c49a20;stop-opacity:1" />
+    </linearGradient>
+    <!-- 闪电渐变 -->
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#55ff99;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00cc66;stop-opacity:1" />
+    </linearGradient>
+    <!-- 绿色宝石渐变 -->
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#55ffaa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#17a85e;stop-opacity:1" />
+    </linearGradient>
+    <!-- 像素网格纹理 -->
+    <pattern id="pixelGrid" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+      <rect width="16" height="16" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>
+    </pattern>
+    <!-- 外发光 -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- 阴影 -->
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- 背景方块 -->
+  <rect width="512" height="512" rx="32" ry="32" fill="url(#bgGrad)"/>
+  <rect width="512" height="512" rx="32" ry="32" fill="url(#pixelGrid)"/>
+
+  <!-- 背景装饰像素点 -->
+  <rect x="40" y="40" width="8" height="8" fill="#2a5a3a" opacity="0.5"/>
+  <rect x="464" y="60" width="8" height="8" fill="#2a5a3a" opacity="0.5"/>
+  <rect x="80" y="450" width="8" height="8" fill="#2a5a3a" opacity="0.5"/>
+  <rect x="420" y="430" width="8" height="8" fill="#2a5a3a" opacity="0.5"/>
+  <rect x="60" y="200" width="6" height="6" fill="#1a4a2a" opacity="0.4"/>
+  <rect x="446" y="300" width="6" height="6" fill="#1a4a2a" opacity="0.4"/>
+
+  <!-- ============ 主图标：箱子 + 闪电 ============ -->
+  <g transform="translate(256, 200)" filter="url(#shadow)">
+
+    <!-- 箱子主体 - 像素风格 -->
+    <!-- 箱底 -->
+    <rect x="-88" y="-48" width="176" height="120" rx="4" fill="#8B6914" stroke="#6B4F10" stroke-width="3"/>
+    <!-- 箱盖 -->
+    <rect x="-96" y="-72" width="192" height="32" rx="4" fill="#A07818" stroke="#6B4F10" stroke-width="3"/>
+    <!-- 箱盖顶部高光 -->
+    <rect x="-92" y="-68" width="184" height="8" fill="#C49A20" opacity="0.4"/>
+
+    <!-- 箱子正面纹理 - MC风格木板线 -->
+    <line x1="-48" y1="-44" x2="-48" y2="68" stroke="#6B4F10" stroke-width="2" opacity="0.4"/>
+    <line x1="0" y1="-44" x2="0" y2="68" stroke="#6B4F10" stroke-width="2" opacity="0.4"/>
+    <line x1="48" y1="-44" x2="48" y2="68" stroke="#6B4F10" stroke-width="2" opacity="0.4"/>
+
+    <!-- 锁扣 - 金色 -->
+    <rect x="-16" y="-56" width="32" height="24" rx="2" fill="url(#goldGrad)" stroke="#8B6914" stroke-width="2"/>
+    <!-- 锁扣孔 -->
+    <rect x="-6" y="-48" width="12" height="12" rx="2" fill="#1a3a2a"/>
+
+    <!-- 箱子边框高光 -->
+    <line x1="-88" y1="-48" x2="88" y2="-48" stroke="#C49A20" stroke-width="1.5" opacity="0.6"/>
+
+    <!-- ============ 闪电符号（叠加在箱子上） ============ -->
+    <g filter="url(#glow)">
+      <!-- 闪电主体 -->
+      <polygon points="12,-60  -12,-10  4,-10  -16,60  20,0  2,0  18,-48"
+               fill="url(#boltGrad)" stroke="#00aa55" stroke-width="1.5"
+               stroke-linejoin="round"/>
+      <!-- 闪电高光 -->
+      <polygon points="10,-52  -4,-16  4,-16  0,-8  10,-20  6,-20  12,-44"
+               fill="#aaffcc" opacity="0.35"/>
+    </g>
+  </g>
+
+  <!-- ============ 循环箭头（表示增量/版本管理） ============ -->
+  <g transform="translate(256, 200)" filter="url(#glow)" opacity="0.7">
+    <!-- 上方弧线 -->
+    <path d="M -110,-90 A 120,120 0 0,1 110,-90"
+          fill="none" stroke="#55ffaa" stroke-width="3" stroke-dasharray="6,4"/>
+    <!-- 箭头尖 -->
+    <polygon points="110,-90  100,-104  118,-98" fill="#55ffaa"/>
+
+    <!-- 下方弧线 -->
+    <path d="M 110,100 A 120,120 0 0,1 -110,100"
+          fill="none" stroke="#55ffaa" stroke-width="3" stroke-dasharray="6,4"/>
+    <!-- 箭头尖 -->
+    <polygon points="-110,100  -100,114  -118,108" fill="#55ffaa"/>
+  </g>
+
+  <!-- ============ 绿宝石装饰（MC元素） ============ -->
+  <!-- 左上 -->
+  <g transform="translate(100, 80)">
+    <rect x="-10" y="-10" width="20" height="20" fill="url(#emeraldGrad)" stroke="#0a6030" stroke-width="2" transform="rotate(45)"/>
+    <rect x="-4" y="-4" width="8" height="8" fill="#aaffcc" opacity="0.5" transform="rotate(45)"/>
+  </g>
+  <!-- 右上 -->
+  <g transform="translate(412, 80)">
+    <rect x="-10" y="-10" width="20" height="20" fill="url(#emeraldGrad)" stroke="#0a6030" stroke-width="2" transform="rotate(45)"/>
+    <rect x="-4" y="-4" width="8" height="8" fill="#aaffcc" opacity="0.5" transform="rotate(45)"/>
+  </g>
+
+  <!-- ============ 中文标题 ============ -->
+  <text x="256" y="360" text-anchor="middle"
+        font-family="'Noto Sans SC', 'Microsoft YaHei', 'PingFang SC', sans-serif"
+        font-size="64" font-weight="900" letter-spacing="12"
+        fill="url(#goldGrad)" filter="url(#glow)">
+    极速备份
+  </text>
+
+  <!-- 英文副标题 -->
+  <text x="256" y="400" text-anchor="middle"
+        font-family="'Courier New', 'Consolas', monospace"
+        font-size="22" font-weight="700" letter-spacing="6"
+        fill="#55ffaa" opacity="0.85">
+    INSTANT BACKUP
+  </text>
+
+  <!-- 底部装饰线 -->
+  <line x1="140" y1="420" x2="372" y2="420" stroke="#55ffaa" stroke-width="1.5" opacity="0.3"/>
+  <rect x="248" y="416" width="16" height="8" fill="#55ffaa" opacity="0.5" rx="2"/>
+
+  <!-- 版本标记 -->
+  <text x="256" y="460" text-anchor="middle"
+        font-family="'Courier New', monospace"
+        font-size="13" fill="#5a8a6a" letter-spacing="3">
+    MINECRAFT MOD
+  </text>
+
+  <!-- 小像素装饰 - 绿色粒子 -->
+  <rect x="160" y="130" width="4" height="4" fill="#55ffaa" opacity="0.3"/>
+  <rect x="340" y="150" width="4" height="4" fill="#55ffaa" opacity="0.25"/>
+  <rect x="180" y="280" width="3" height="3" fill="#55ffaa" opacity="0.2"/>
+  <rect x="330" y="310" width="3" height="3" fill="#55ffaa" opacity="0.2"/>
+  <rect x="130" y="220" width="5" height="5" fill="#e8b830" opacity="0.15"/>
+  <rect x="380" y="240" width="5" height="5" fill="#e8b830" opacity="0.15"/>
+</svg>

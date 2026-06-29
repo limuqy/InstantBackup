@@ -1,0 +1,19 @@
+plugins {
+    id 'java-library'
+}
+
+group = rootProject.group
+version = rootProject.version
+
+apply from: "${rootDir}/buildSrc/src/main/groovy/library-java.gradle"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api('org.xerial:sqlite-jdbc:3.45.1.0')
+    api 'com.github.luben:zstd-jni:1.5.6-8'
+    api 'org.lz4:lz4-java:1.8.0'
+    implementation 'org.slf4j:slf4j-simple:2.0.13'
+}

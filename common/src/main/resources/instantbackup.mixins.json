@@ -1,0 +1,10 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.limuqy.mc.backup.mixins",
+  "compatibilityLevel": "JAVA_${java_version}",
+  "mixins": [
+    "ChunkSaveMixin",
+    "ServerTickMixin"
+  ]
+}

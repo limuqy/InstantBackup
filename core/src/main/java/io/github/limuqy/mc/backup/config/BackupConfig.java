@@ -1,0 +1,383 @@
+package io.github.limuqy.mc.backup.config;
+
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.util.Properties;
+
+public class BackupConfig {
+    private static final String CONFIG_FILE = "instantbackup.properties";
+    private static Properties properties = new Properties();
+    private static Path configPath;
+
+    // 默认值
+    private static final int DEFAULT_BACKUP_INTERVAL = 3600;
+    private static final boolean DEFAULT_ENABLED = true;
+    private static final boolean DEFAULT_ONLY_WHEN_PLAYERS_ONLINE = true;
+    private static final boolean DEFAULT_EXCLUDE_CARPET_BOTS = true;
+    private static final int DEFAULT_COMPRESSION_LEVEL = 19;
+    private static final int DEFAULT_COMPRESSION_THREADS = 2;
+    private static final boolean DEFAULT_DEFERRED_CHUNK_MIGRATION = true;
+    private static final boolean DEFAULT_CHUNK_FULL_HASH = false;
+    private static final int DEFAULT_THREAD_COUNT = 2;
+    private static final int DEFAULT_MAX_VERSIONS = 30;
+    private static final String DEFAULT_STORAGE_PATH = "backups";
+    private static final String DEFAULT_LANGUAGE = "zh_cn";
+    private static final boolean DEFAULT_SCRIPT_ENABLED = true;
+
+    public static void init(Path configDir) {
+        configPath = configDir.resolve(CONFIG_FILE);
+        if (!Files.exists(configPath)) {
+            generateDefaultConfig();
+        }
+        load();
+    }
+
+    /**
+     * 生成带中文注释的默认配置文件
+     */
+    private static void generateDefaultConfig() {
+        try {
+            Files.createDirectories(configPath.getParent());
+            String content = "# =============================================\n" +
+                "# 极速备份 模组配置文件\n" +
+                "# =============================================\n" +
+                "\n" +
+                "# -------------------------------------------\n" +
+                "# 通用设置\n" +
+                "# -------------------------------------------\n" +
+                "\n" +
+                "# 模组消息语言\n" +
+                "# 可选值: zh_cn（中文）/ en_us（英文）\n" +
+                "general.language=zh_cn\n" +
+                "\n" +
+                "# 是否在 config/instantbackup/ 生成一键备份脚本（InstantBackup.cmd / .sh）\n" +
+                "script.enabled=true\n" +
+                "\n" +
+                "# -------------------------------------------\n" +
+                "# 备份设置\n" +
+                "# -------------------------------------------\n" +
+                "\n" +
+                "# 是否启用定时备份\n" +
+                "# 可选值: true / false\n" +
+                "backup.enabled=true\n" +
+                "\n" +
+                "# 定时备份间隔（单位：秒）\n" +
+                "# 默认: 3600（1小时）\n" +
+                "# 最小建议值: 60（1分钟）\n" +
+                "backup.interval=3600\n" +
+                "\n" +
+                "# 是否只在玩家在线时进行定时备份\n" +
+                "# 设为 true 可以在服务器空闲时跳过备份，节省资源\n" +
+                "# 可选值: true / false\n" +
+                "backup.only_when_players_online=true\n" +
+                "\n" +
+                "# 是否排除地毯假人（Carpet Mod 的假人玩家）\n" +
+                "# 设为 true 时，只有真实玩家在线才算有玩家在线\n" +
+                "# 可选值: true / false\n" +
+                "backup.exclude_carpet_bots=true\n" +
+                "\n" +
+                "# 区块文件是否延迟迁移（COW）\n" +
+                "# true = 区块在即将被覆盖时才复制到备份区；false = 备份时立即复制\n" +
+                "backup.deferred_chunk_migration=true\n" +
+                "\n" +
+                "# 区块文件是否使用全量 hash（false 则仅用前 8KB + size）\n" +
+                "chunk.full_hash=false\n" +
+                "\n" +
+                "# -------------------------------------------\n" +
+                "# 压缩设置\n" +
+                "# -------------------------------------------\n" +
+                "\n" +
+                "# ZSTD 压缩等级（范围：1-22）\n" +
+                "# 异步压缩模式下推荐较高等级以换取更小体积\n" +
+                "compression.level=19\n" +
+                "\n" +
+                "# 压缩消费者线程数\n" +
+                "compression.threads=2\n" +
+                "\n" +
+                "# -------------------------------------------\n" +
+                "# 性能设置\n" +
+                "# -------------------------------------------\n" +
+                "\n" +
+                "# 备份线程池核心线程数\n" +
+                "# 增加此值可以加快备份速度，但会占用更多 CPU 资源\n" +
+                "# 建议值: CPU 核心数的一半，最小为 1\n" +
+                "thread.count=2\n" +
+                "\n" +
+                "# -------------------------------------------\n" +
+                "# 存储设置\n" +
+                "# -------------------------------------------\n" +
+                "\n" +
+                "# 最大保留备份版本数\n" +
+                "# 超过此数量的旧版本会被自动删除\n" +
+                "# 设为 0 表示不限制\n" +
+                "storage.max_versions=30\n" +
+                "\n" +
+                "# 备份存储路径\n" +
+                "# 相对路径：相对于服务器根目录（默认 backups）\n" +
+                "# 绝对路径：支持跨盘符，如 D:/minecraft-backups 或 \\\\nas\\share\\backups\n" +
+                "storage.path=backups\n";
+
+            Files.write(configPath, content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void load() {
+        if (Files.exists(configPath)) {
+            try (InputStream is = Files.newInputStream(configPath)) {
+                properties.load(is);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        // 设置默认值（防止配置文件缺少某些项）
+        setDefault("backup.interval", String.valueOf(DEFAULT_BACKUP_INTERVAL));
+        setDefault("backup.enabled", String.valueOf(DEFAULT_ENABLED));
+        setDefault("backup.only_when_players_online", String.valueOf(DEFAULT_ONLY_WHEN_PLAYERS_ONLINE));
+        setDefault("backup.exclude_carpet_bots", String.valueOf(DEFAULT_EXCLUDE_CARPET_BOTS));
+        setDefault("backup.deferred_chunk_migration", String.valueOf(DEFAULT_DEFERRED_CHUNK_MIGRATION));
+        setDefault("chunk.full_hash", String.valueOf(DEFAULT_CHUNK_FULL_HASH));
+        setDefault("compression.level", String.valueOf(DEFAULT_COMPRESSION_LEVEL));
+        setDefault("compression.threads", String.valueOf(DEFAULT_COMPRESSION_THREADS));
+        setDefault("thread.count", String.valueOf(DEFAULT_THREAD_COUNT));
+        setDefault("storage.max_versions", String.valueOf(DEFAULT_MAX_VERSIONS));
+        setDefault("storage.path", DEFAULT_STORAGE_PATH);
+        setDefault("general.language", DEFAULT_LANGUAGE);
+        setDefault("script.enabled", String.valueOf(DEFAULT_SCRIPT_ENABLED));
+    }
+
+    private static void setDefault(String key, String value) {
+        properties.putIfAbsent(key, value);
+    }
+
+    /**
+     * 保存配置文件（保留中文注释）
+     */
+    public static void save() {
+        try {
+            Files.createDirectories(configPath.getParent());
+            String content = "# =============================================\n" +
+                "# 极速备份 模组配置文件\n" +
+                "# =============================================\n" +
+                "\n" +
+                "# -------------------------------------------\n" +
+                "# 通用设置\n" +
+                "# -------------------------------------------\n" +
+                "\n" +
+                "# 模组消息语言\n" +
+                "# 可选值: zh_cn（中文）/ en_us（英文）\n" +
+                "general.language=" + properties.getProperty("general.language") + "\n" +
+                "\n" +
+                "# 是否在 config/instantbackup/ 生成一键备份脚本\n" +
+                "script.enabled=" + properties.getProperty("script.enabled") + "\n" +
+                "\n" +
+                "# -------------------------------------------\n" +
+                "# 备份设置\n" +
+                "# -------------------------------------------\n" +
+                "\n" +
+                "# 是否启用定时备份\n" +
+                "# 可选值: true / false\n" +
+                "backup.enabled=" + properties.getProperty("backup.enabled") + "\n" +
+                "\n" +
+                "# 定时备份间隔（单位：秒）\n" +
+                "# 默认: 3600（1小时）\n" +
+                "# 最小建议值: 60（1分钟）\n" +
+                "backup.interval=" + properties.getProperty("backup.interval") + "\n" +
+                "\n" +
+                "# 是否只在玩家在线时进行定时备份\n" +
+                "# 设为 true 可以在服务器空闲时跳过备份，节省资源\n" +
+                "# 可选值: true / false\n" +
+                "backup.only_when_players_online=" + properties.getProperty("backup.only_when_players_online") + "\n" +
+                "\n" +
+                "# 是否排除地毯假人（Carpet Mod 的假人玩家）\n" +
+                "# 设为 true 时，只有真实玩家在线才算有玩家在线\n" +
+                "# 可选值: true / false\n" +
+                "backup.exclude_carpet_bots=" + properties.getProperty("backup.exclude_carpet_bots") + "\n" +
+                "\n" +
+                "# 区块文件是否延迟迁移（COW）\n" +
+                "backup.deferred_chunk_migration=" + properties.getProperty("backup.deferred_chunk_migration") + "\n" +
+                "\n" +
+                "# 区块文件是否使用全量 hash\n" +
+                "chunk.full_hash=" + properties.getProperty("chunk.full_hash") + "\n" +
+                "\n" +
+                "# -------------------------------------------\n" +
+                "# 压缩设置\n" +
+                "# -------------------------------------------\n" +
+                "\n" +
+                "# ZSTD 压缩等级（范围：1-22）\n" +
+                "compression.level=" + properties.getProperty("compression.level") + "\n" +
+                "\n" +
+                "# 压缩消费者线程数\n" +
+                "compression.threads=" + properties.getProperty("compression.threads") + "\n" +
+                "\n" +
+                "# -------------------------------------------\n" +
+                "# 性能设置\n" +
+                "# -------------------------------------------\n" +
+                "\n" +
+                "# 备份线程池核心线程数\n" +
+                "# 增加此值可以加快备份速度，但会占用更多 CPU 资源\n" +
+                "# 建议值: CPU 核心数的一半，最小为 1\n" +
+                "thread.count=" + properties.getProperty("thread.count") + "\n" +
+                "\n" +
+                "# -------------------------------------------\n" +
+                "# 存储设置\n" +
+                "# -------------------------------------------\n" +
+                "\n" +
+                "# 最大保留备份版本数\n" +
+                "# 超过此数量的旧版本会被自动删除\n" +
+                "# 设为 0 表示不限制\n" +
+                "storage.max_versions=" + properties.getProperty("storage.max_versions") + "\n" +
+                "\n" +
+                "# 备份存储路径\n" +
+                "# 相对路径：相对于服务器根目录；绝对路径支持跨盘符\n" +
+                "storage.path=" + properties.getProperty("storage.path") + "\n";
+
+            Files.write(configPath, content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void reload() {
+        properties.clear();
+        load();
+        io.github.limuqy.mc.backup.i18n.I18n.reload();
+    }
+
+    // Getter 方法（带 null 安全保护）
+    public static int getBackupInterval() {
+        String val = properties.getProperty("backup.interval");
+        return val != null ? Integer.parseInt(val) : DEFAULT_BACKUP_INTERVAL;
+    }
+
+    public static boolean isEnabled() {
+        String val = properties.getProperty("backup.enabled");
+        return val != null ? Boolean.parseBoolean(val) : DEFAULT_ENABLED;
+    }
+
+    public static boolean isOnlyWhenPlayersOnline() {
+        String val = properties.getProperty("backup.only_when_players_online");
+        return val != null ? Boolean.parseBoolean(val) : DEFAULT_ONLY_WHEN_PLAYERS_ONLINE;
+    }
+
+    public static boolean isExcludeCarpetBots() {
+        String val = properties.getProperty("backup.exclude_carpet_bots");
+        return val != null ? Boolean.parseBoolean(val) : DEFAULT_EXCLUDE_CARPET_BOTS;
+    }
+
+    public static int getCompressionLevel() {
+        String val = properties.getProperty("compression.level");
+        return val != null ? Integer.parseInt(val) : DEFAULT_COMPRESSION_LEVEL;
+    }
+
+    public static boolean isDeferredChunkMigration() {
+        String val = properties.getProperty("backup.deferred_chunk_migration");
+        return val != null ? Boolean.parseBoolean(val) : DEFAULT_DEFERRED_CHUNK_MIGRATION;
+    }
+
+    public static boolean isChunkFullHash() {
+        String val = properties.getProperty("chunk.full_hash");
+        return val != null ? Boolean.parseBoolean(val) : DEFAULT_CHUNK_FULL_HASH;
+    }
+
+    public static int getCompressionThreads() {
+        String val = properties.getProperty("compression.threads");
+        return val != null ? Integer.parseInt(val) : DEFAULT_COMPRESSION_THREADS;
+    }
+
+    public static int getThreadCount() {
+        String val = properties.getProperty("thread.count");
+        return val != null ? Integer.parseInt(val) : DEFAULT_THREAD_COUNT;
+    }
+
+    public static int getMaxVersions() {
+        String val = properties.getProperty("storage.max_versions");
+        return val != null ? Integer.parseInt(val) : DEFAULT_MAX_VERSIONS;
+    }
+
+    public static String getStoragePath() {
+        String val = properties.getProperty("storage.path");
+        return val != null ? val : DEFAULT_STORAGE_PATH;
+    }
+
+    public static String getLanguage() {
+        String val = properties.getProperty("general.language");
+        return val != null ? val : DEFAULT_LANGUAGE;
+    }
+
+    public static boolean isScriptEnabled() {
+        String val = properties.getProperty("script.enabled");
+        return val != null ? Boolean.parseBoolean(val) : DEFAULT_SCRIPT_ENABLED;
+    }
+
+    // Setter 方法
+    public static void setBackupInterval(int interval) {
+        properties.setProperty("backup.interval", String.valueOf(interval));
+        save();
+    }
+
+    public static void setEnabled(boolean enabled) {
+        properties.setProperty("backup.enabled", String.valueOf(enabled));
+        save();
+    }
+
+    public static void setOnlyWhenPlayersOnline(boolean only) {
+        properties.setProperty("backup.only_when_players_online", String.valueOf(only));
+        save();
+    }
+
+    public static void setExcludeCarpetBots(boolean exclude) {
+        properties.setProperty("backup.exclude_carpet_bots", String.valueOf(exclude));
+        save();
+    }
+
+    public static void setCompressionLevel(int level) {
+        properties.setProperty("compression.level", String.valueOf(level));
+        save();
+    }
+
+    public static void setThreadCount(int count) {
+        properties.setProperty("thread.count", String.valueOf(count));
+        save();
+    }
+
+    public static void setMaxVersions(int max) {
+        properties.setProperty("storage.max_versions", String.valueOf(max));
+        save();
+    }
+
+    public static boolean setStoragePath(String path) {
+        if (path == null || path.trim().isEmpty()) {
+            return false;
+        }
+        String normalized = path.trim();
+        properties.setProperty("storage.path", normalized);
+        save();
+        try {
+            Path probe = Paths.get(normalized);
+            Path target = probe.isAbsolute() ? probe : Paths.get(".").resolve(probe);
+            Files.createDirectories(target);
+        } catch (IOException e) {
+            io.github.limuqy.mc.backup.logging.ModLog.warn(
+                "[Instant Backup] 无法创建或访问备份目录 {}: {}", normalized, e.getMessage());
+        }
+        return true;
+    }
+
+    public static void setDeferredChunkMigration(boolean enabled) {
+        properties.setProperty("backup.deferred_chunk_migration", String.valueOf(enabled));
+        save();
+    }
+
+    public static void setLanguage(String language) {
+        properties.setProperty("general.language", language);
+        save();
+    }
+
+    public static Properties getProperties() {
+        return properties;
+    }
+}
