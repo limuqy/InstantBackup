@@ -13,7 +13,6 @@ dependencies {
     }
     implementation 'com.github.luben:zstd-jni:1.5.6-8'
     implementation 'org.lz4:lz4-java:1.8.0'
-    implementation 'org.slf4j:slf4j-simple:2.0.13'
 }
 
 // Shade external dependencies into the mod jar
@@ -21,7 +20,6 @@ jar {
     from({
         configurations.runtimeClasspath.filter {
             it.name.contains('sqlite-jdbc') || it.name.contains('zstd-jni') || it.name.contains('lz4-java')
-                || it.name.contains('slf4j-simple')
         }.collect { zipTree(it) }
     }) {
         exclude 'META-INF/**'
