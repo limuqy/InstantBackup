@@ -14,6 +14,11 @@ unimined.minecraft(sourceSets.main, true) {
 if (project.name == "common") return // Don't apply the code below to the common project
 
 unimined.minecraft(sourceSets.main, true) {
+    // Use combineWith to properly merge core and common into the mod module.
+    // This ensures Forge/NeoForge ModuleClassLoader can resolve all classes at runtime.
+    combineWith project(":core"), project(":core").sourceSets.main
+    combineWith project(":common"), project(":common").sourceSets.main
+
     mods.modImplementation {
         mixinRemap {
             enableBaseMixin()
@@ -22,25 +27,13 @@ unimined.minecraft(sourceSets.main, true) {
     }
 }
 
-dependencies {
-    implementation(project(":common"))
-    implementation(project(":core"))
-}
-
 processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from project(":common").sourceSets.main.resources
     from project(":core").sourceSets.main.resources
 }
 
-tasks.withType(JavaCompile).configureEach {
-    if (name == "compileJava") {
-        source(project(":common").sourceSets.main.allSource)
-    }
-}
-
 tasks.named('jar').configure {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(project(':core').sourceSets.main.output)
     from(project(':cli').sourceSets.main.output)
 }
