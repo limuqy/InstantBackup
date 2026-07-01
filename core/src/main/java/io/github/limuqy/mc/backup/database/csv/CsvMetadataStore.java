@@ -3,6 +3,8 @@ package io.github.limuqy.mc.backup.database.csv;
 import io.github.limuqy.mc.backup.database.*;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
@@ -46,7 +48,7 @@ public class CsvMetadataStore implements MetadataStore {
             Path schemaPath = metadataDir.resolve("schema.properties");
             if (Files.exists(schemaPath)) {
                 Properties props = new Properties();
-                try (var is = Files.newInputStream(schemaPath)) {
+                try (InputStream is = Files.newInputStream(schemaPath)) {
                     props.load(is);
                 }
                 int version = Integer.parseInt(props.getProperty("version", "0"));
@@ -96,7 +98,7 @@ public class CsvMetadataStore implements MetadataStore {
         Properties props = new Properties();
         props.setProperty("version", String.valueOf(SCHEMA_VERSION));
         Path schemaPath = metadataDir.resolve("schema.properties");
-        try (var os = Files.newOutputStream(schemaPath)) {
+        try (OutputStream os = Files.newOutputStream(schemaPath)) {
             props.store(os, "InstantBackup Metadata Schema");
         }
     }
