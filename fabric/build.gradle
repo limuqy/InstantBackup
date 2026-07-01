@@ -4,9 +4,7 @@ plugins {
 
 dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${gradle.ext.fabric_api_version}"
-    implementation('org.xerial:sqlite-jdbc:3.45.1.0') {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
-    }
+    implementation 'com.mysql:mysql-connector-j:8.4.0'
     implementation 'com.github.luben:zstd-jni:1.5.6-8'
     implementation 'at.yawk.lz4:lz4-java:1.8.1'
 }
@@ -15,7 +13,13 @@ dependencies {
 jar {
     from({
         configurations.runtimeClasspath.filter {
-            it.name.contains('sqlite-jdbc') || it.name.contains('zstd-jni') || it.name.contains('lz4-java')
+            it.name.contains('mysql-connector-j') ||
+            it.name.contains('zstd-jni') ||
+            it.name.contains('lz4-java') ||
+            it.name.contains('opencsv') ||
+            it.name.contains('commons-lang3') ||
+            it.name.contains('commons-beanutils') ||
+            it.name.contains('commons-collections4')
         }.collect { zipTree(it) }
     }) {
         exclude 'META-INF/**'

@@ -57,7 +57,12 @@
 └── config/
     └── instantbackup/
         ├── instantbackup.properties
-        ├── backups.db          # SQLite 元数据（不随 storage.path 迁移）
+        ├── metadata/           # CSV 元数据（storage.metadata.type=csv，默认）
+        │   ├── schema.properties
+        │   ├── versions.csv
+        │   ├── blobs.csv
+        │   └── file_info.csv
+        ├── backups.db          # SQLite 元数据（storage.metadata.type=sqlite）
         ├── InstantBackup.cmd   # Windows 一键脚本（script.enabled=true）
         └── InstantBackup.sh    # Linux/macOS 一键脚本
 ```
@@ -66,7 +71,7 @@
 - 已压缩：`data/<相对路径>.<hash>.zst`（如 `data/world/region/r.0.0.mca.a1b2c3d4.zst`）
 - 中间态 raw：`data/<相对路径>.<hash>`（压缩完成后删除）
 
-跨盘符示例：在 `config/instantbackup/instantbackup.properties` 中设置 `storage.path=D:/minecraft-backups`，**重启服务器**后备份 blob 写入 D 盘，数据库仍在 `config/instantbackup/`。
+跨盘符示例：在 `config/instantbackup/instantbackup.properties` 中设置 `storage.path=D:/minecraft-backups`，**重启服务器**后备份 blob 写入 D 盘，元数据仍在 `config/instantbackup/`（CSV/SQLite）或 MySQL 远程库。详见 [metadata-storage.md](metadata-storage.md)。
 
 ### 1.4 开发环境自检（SelfTest）
 
@@ -114,7 +119,7 @@ powershell -File scripts/verify_backup_rcon.ps1
 **预期结果：**
 - 返回「备份已开始: 20260629_120000」格式的消息
 - `backups/data/` 目录下出现 `.zst` blob 文件（非「每版本独立文件夹」）
-- `config/instantbackup/backups.db` 中写入版本记录
+- 元数据写入成功：`metadata/versions.csv`（CSV 默认）或 `backups.db`（sqlite）或 MySQL 远程表（mysql）
 - 版本初始状态可能为「进行中」，压缩完成后变为「已完成」
 
 **验证方法：**
@@ -214,8 +219,9 @@ SELECT blob_key, COUNT(*) FROM blobs GROUP BY blob_key HAVING COUNT(*) > 1;
 # 检查备份目录（blob 可能部分保留）
 ls backups/data/
 
-# 检查数据库记录
+# 检查数据库记录（仅 storage.metadata.type=sqlite 时）
 sqlite3 config/instantbackup/backups.db "SELECT * FROM backup_versions;"
+# CSV 默认后端：检查 metadata/versions.csv；MySQL：见 metadata-storage.md §13
 ```
 
 ### 2.6 备份导出测试

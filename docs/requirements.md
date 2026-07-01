@@ -25,9 +25,9 @@
 ### 2.2 版本管理与存储
 
 **需求描述：**
-- 使用 SQLite 数据库（schema v2）储存档版本与文件元数据
+- 元数据支持多后端（**CSV 默认** / SQLite / MySQL 8），共用 schema v2 语义；详见 [元数据存储开发文档](metadata-storage.md)
 - 物理文件按 blob 去重存储于 `<storage.path>/data/`，命名规则：`<相对路径>.<hash>[.zst]`
-- 数据库固定位于 `config/instantbackup/backups.db`，不随 `storage.path` 迁移
+- CSV 元数据位于 `config/instantbackup/metadata/`；SQLite 位于 `config/instantbackup/backups.db`；MySQL 为远程库——均不随 `storage.path` 迁移
 - 版本命名：`yyyyMMdd_HHmmss`（如 `20260628_143025`）
 - 超出 `storage.max_versions` 的旧版本自动删除
 
@@ -44,8 +44,9 @@
 | IN_PROGRESS | 仍有 blob 未完成迁移/压缩 |
 | COMPLETED | 所有 blob 均已 STORED |
 
-**实现状态：✅ 已实现**
-- 数据库：[`DatabaseManager`](core/src/main/java/io/github/limuqy/mc/backup/database/DatabaseManager.java)
+**实现状态：⚠️ 部分实现**
+- 当前代码：[`DatabaseManager`](core/src/main/java/io/github/limuqy/mc/backup/database/DatabaseManager.java)（SQLite）
+- 计划：CSV 默认 + SQLite（需 Minecraft SQLite JDBC 模组）+ MySQL 8（Mod shade mysql-connector-j）
 - 物理存储：[`BlobStore`](core/src/main/java/io/github/limuqy/mc/backup/storage/BlobStore.java)
 - 启动恢复：服务器启动时 `recoverOnStartup()` 恢复 PENDING 映射并重入队 STAGED blob
 
@@ -224,7 +225,9 @@ cli/                           # 停服离线 REPL / 单次命令
 | 库 | 用途 |
 |----|------|
 | lz4-java (jpountz XXHash) | 文件变化检测哈希 |
-| SQLite JDBC | 嵌入式数据库 |
+| CSV（内置） | 默认元数据存储，无 JDBC |
+| SQLite JDBC | 可选；Mod 依赖 Minecraft SQLite JDBC 模组，CLI 内嵌 xerial |
+| mysql-connector-j | 可选 MySQL 8；Mod/CLI shade |
 | zstd-jni | ZSTD 压缩 |
 
 ### 5.3 数据库设计（schema v2）
@@ -276,7 +279,7 @@ CREATE TABLE file_info (
   → 扫描世界目录 → XXHash64 增量检测
   → 新 blob: capture → STAGED → CompressionQueue → STORED
   → 区块 COW（ChunkSaveMixin）补充 PENDING blob
-  → 写入 SQLite → 版本 COMPLETED
+  → 写入元数据存储（CSV / SQLite / MySQL）→ 版本 COMPLETED
 ```
 
 ---
@@ -286,7 +289,7 @@ CREATE TABLE file_info (
 | 功能 | 状态 |
 |------|------|
 | 增量备份 + blob 去重 + COW | ✅ |
-| SQLite schema v2 + 版本管理 | ✅ |
+| 多元数据存储 schema v2 + 版本管理 | ⚠️ SQLite 已实现；CSV/MySQL 见 [metadata-storage.md](metadata-storage.md) |
 | 命令（create/list/delete/export/migrate/status/config/clean） | ✅ |
 | ZSTD 异步压缩 + 双线程池 | ✅ |
 | 配置热更新 + 一键脚本 + CLI | ✅ |

@@ -41,6 +41,10 @@ public class CompressionQueue {
         if (!running.compareAndSet(false, true)) {
             return;
         }
+        if (!BackupConfig.isCompressionEnabled()) {
+            ModLog.info("[Instant Backup] 压缩已关闭，跳过压缩队列 worker");
+            return;
+        }
         int threadCount = Math.max(1, BackupConfig.getCompressionThreads());
         workers = new Thread[threadCount];
         for (int i = 0; i < threadCount; i++) {
@@ -72,6 +76,16 @@ public class CompressionQueue {
 
     public int getQueueSize() {
         return queue.size();
+    }
+
+    /**
+     * 同步处理队列中所有待处理 blob（压缩关闭且无 worker 时使用）
+     */
+    public void drainPendingSync() {
+        String blobKey;
+        while ((blobKey = queue.poll()) != null) {
+            processBlob(blobKey);
+        }
     }
 
     /**
@@ -118,10 +132,16 @@ public class CompressionQueue {
             if (blob.getState() != BlobState.STAGED) {
                 return;
             }
-            long compressedSize = blobStore.compressRaw(blob);
-            dbManager.updateBlobState(blobKey, BlobState.STORED, compressedSize);
+            long storedSize;
+            if (BackupConfig.isCompressionEnabled()) {
+                storedSize = blobStore.compressRaw(blob);
+                ModLog.debug("[Instant Backup] 压缩完成: {} ({} bytes)", blob.getFilePath(), storedSize);
+            } else {
+                storedSize = blobStore.finalizeWithoutCompression(blob);
+                ModLog.debug("[Instant Backup] 未压缩存储: {} ({} bytes)", blob.getFilePath(), storedSize);
+            }
+            dbManager.updateBlobState(blobKey, BlobState.STORED, storedSize);
             BackupEngine.getInstance().onBlobStored(blobKey);
-            ModLog.debug("[Instant Backup] 压缩完成: {} ({} bytes)", blob.getFilePath(), compressedSize);
         } catch (Exception e) {
             ModLog.warn("[Instant Backup] 压缩失败，将稍后重试: {}", blobKey, e);
             enqueue(blobKey);

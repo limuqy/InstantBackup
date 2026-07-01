@@ -13,9 +13,7 @@ configurations.minecraftLibraries.extendsFrom(configurations.library)
 
 dependencies {
     // External dependencies (also injected into dev run classpath via the 'library' configuration)
-    library('org.xerial:sqlite-jdbc:3.45.1.0') {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
-    }
+    library 'com.mysql:mysql-connector-j:8.4.0'
     library 'com.github.luben:zstd-jni:1.5.6-8'
     library 'at.yawk.lz4:lz4-java:1.8.1'
 }
@@ -24,7 +22,13 @@ dependencies {
 jar {
     from({
         configurations.runtimeClasspath.filter {
-            it.name.contains('sqlite-jdbc') || it.name.contains('zstd-jni') || it.name.contains('lz4-java')
+            it.name.contains('mysql-connector-j') ||
+            it.name.contains('zstd-jni') ||
+            it.name.contains('lz4-java') ||
+            it.name.contains('opencsv') ||
+            it.name.contains('commons-lang3') ||
+            it.name.contains('commons-beanutils') ||
+            it.name.contains('commons-collections4')
         }.collect { zipTree(it) }
     }) {
         exclude 'META-INF/**'

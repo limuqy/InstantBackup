@@ -68,7 +68,7 @@ SERVER_STOPPING
 | 资源 | 路径 |
 |------|------|
 | 配置 | `<server>/config/instantbackup/instantbackup.properties` |
-| 数据库 | `<server>/config/instantbackup/backups.db` |
+| 元数据 | `<server>/config/instantbackup/metadata/`（CSV 默认）或 `backups.db`（SQLite）或 MySQL 远程 |
 | 备份数据 | `<server>/backups/`（默认，由 `storage.path` 配置，支持绝对路径跨盘符） |
 | Blob 存储 | `<backupPath>/data/` |
 | 一键脚本 | `<server>/config/instantbackup/InstantBackup.cmd` / `InstantBackup.sh`（服务器启动时自动生成） |
@@ -168,4 +168,5 @@ powershell -File scripts/verify_backup_rcon.ps1
 ## 详细参考
 
 - 架构与备份流水线：[reference.md](reference.md)
+- 元数据多后端存储：[docs/metadata-storage.md](docs/metadata-storage.md)
 - 功能测试步骤：[docs/functional-testing.md](docs/functional-testing.md)

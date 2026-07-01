@@ -95,6 +95,9 @@ public class BackupEngine {
                 pendingCaptureMap.put(blob.getFilePath(), blob.getBlobKey());
             }
             compressionQueue.requeueStagedBlobs();
+            if (!BackupConfig.isCompressionEnabled()) {
+                compressionQueue.drainPendingSync();
+            }
             for (VersionInfo version : dbManager.getAllVersions()) {
                 dbManager.refreshVersionCompletion(version.getId());
             }
@@ -261,9 +264,15 @@ public class BackupEngine {
             return;
         }
         blobStore.captureToRaw(source, blob.getFilePath(), blob.getFileHash());
-        dbManager.updateBlobState(blob.getBlobKey(), BlobState.STAGED, 0);
         pendingCaptureMap.remove(blob.getFilePath());
-        compressionQueue.enqueue(blob.getBlobKey());
+        if (BackupConfig.isCompressionEnabled()) {
+            dbManager.updateBlobState(blob.getBlobKey(), BlobState.STAGED, 0);
+            compressionQueue.enqueue(blob.getBlobKey());
+        } else {
+            long storedSize = blobStore.finalizeWithoutCompression(blob);
+            dbManager.updateBlobState(blob.getBlobKey(), BlobState.STORED, storedSize);
+            onBlobStored(blob.getBlobKey());
+        }
     }
 
     public void onChunkSave(String relativePath) {
@@ -288,9 +297,7 @@ public class BackupEngine {
                 pendingCaptureMap.put(relativePath, blobKey);
                 return;
             }
-            blobStore.captureToRaw(source, blob.getFilePath(), blob.getFileHash());
-            dbManager.updateBlobState(blobKey, BlobState.STAGED, 0);
-            compressionQueue.enqueue(blobKey);
+            captureBlob(blob);
         } catch (Exception e) {
             pendingCaptureMap.put(relativePath, blobKey);
             ModLog.error("[Instant Backup] 区块 COW 捕获失败: {}", relativePath, e);

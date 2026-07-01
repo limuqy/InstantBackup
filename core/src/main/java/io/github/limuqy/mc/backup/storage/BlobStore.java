@@ -15,7 +15,8 @@ import java.nio.file.StandardCopyOption;
 /**
  * 镜像世界目录结构的 blob 物理文件管理
  * 压缩态: data/&lt;相对路径&gt;.&lt;hash&gt;.zst
- * 中间态: data/&lt;相对路径&gt;.&lt;hash&gt;
+ * 未压缩 STORED: data/&lt;相对路径&gt;.&lt;hash&gt;
+ * 中间态: data/&lt;相对路径&gt;.&lt;hash&gt;（STAGED，等待压缩）
  */
 public class BlobStore {
     private final Path dataRoot;
@@ -68,6 +69,21 @@ public class BlobStore {
         return compressedSize;
     }
 
+    /**
+     * 不压缩：保留 raw 文件，返回存储大小
+     */
+    public long finalizeWithoutCompression(BlobInfo blob) throws IOException {
+        Path rawPath = resolveRawPath(blob.getFilePath(), blob.getFileHash());
+        Path compressedPath = resolveCompressedPath(blob.getFilePath(), blob.getFileHash());
+        if (Files.exists(rawPath)) {
+            return Files.size(rawPath);
+        }
+        if (Files.exists(compressedPath)) {
+            return Files.size(compressedPath);
+        }
+        throw new IOException("blob 物理文件不存在: " + blob.getFilePath());
+    }
+
     public boolean compressedExists(BlobInfo blob) {
         return Files.exists(resolveCompressedPath(blob.getFilePath(), blob.getFileHash()));
     }
@@ -83,7 +99,7 @@ public class BlobStore {
         Files.createDirectories(targetFile.getParent());
         switch (blob.getState()) {
             case STORED:
-                decompressTo(blob, targetFile);
+                materializeStoredTo(blob, targetFile);
                 break;
             case STAGED:
                 Files.copy(resolveRawPath(blob.getFilePath(), blob.getFileHash()), targetFile, StandardCopyOption.REPLACE_EXISTING);
@@ -100,20 +116,7 @@ public class BlobStore {
     }
 
     public void decompressTo(BlobInfo blob, Path targetFile) throws IOException {
-        Path compressedPath = resolveCompressedPath(blob.getFilePath(), blob.getFileHash());
-        if (!Files.exists(compressedPath)) {
-            throw new IOException("压缩文件不存在: " + compressedPath);
-        }
-        Files.createDirectories(targetFile.getParent());
-        try (InputStream input = Files.newInputStream(compressedPath);
-             com.github.luben.zstd.ZstdInputStream zstdInput = new com.github.luben.zstd.ZstdInputStream(input);
-             OutputStream output = Files.newOutputStream(targetFile)) {
-            byte[] buffer = new byte[65536];
-            int bytesRead;
-            while ((bytesRead = zstdInput.read(buffer)) != -1) {
-                output.write(buffer, 0, bytesRead);
-            }
-        }
+        materializeStoredTo(blob, targetFile);
     }
 
     /**
@@ -121,11 +124,8 @@ public class BlobStore {
      */
     public InputStream openRawContent(BlobInfo blob, Path worldPath) throws IOException {
         switch (blob.getState()) {
-            case STORED: {
-                Path compressedPath = resolveCompressedPath(blob.getFilePath(), blob.getFileHash());
-                InputStream input = Files.newInputStream(compressedPath);
-                return new com.github.luben.zstd.ZstdInputStream(input);
-            }
+            case STORED:
+                return openStoredContent(blob);
             case STAGED:
                 return Files.newInputStream(resolveRawPath(blob.getFilePath(), blob.getFileHash()));
             case PENDING: {
@@ -142,6 +142,44 @@ public class BlobStore {
             Files.deleteIfExists(resolveCompressedPath(blob.getFilePath(), blob.getFileHash()));
             Files.deleteIfExists(resolveRawPath(blob.getFilePath(), blob.getFileHash()));
         } catch (IOException ignored) {
+        }
+    }
+
+    private void materializeStoredTo(BlobInfo blob, Path targetFile) throws IOException {
+        Path compressedPath = resolveCompressedPath(blob.getFilePath(), blob.getFileHash());
+        Path rawPath = resolveRawPath(blob.getFilePath(), blob.getFileHash());
+        Files.createDirectories(targetFile.getParent());
+        if (Files.exists(compressedPath)) {
+            try (InputStream input = Files.newInputStream(compressedPath);
+                 com.github.luben.zstd.ZstdInputStream zstdInput = new com.github.luben.zstd.ZstdInputStream(input);
+                 OutputStream output = Files.newOutputStream(targetFile)) {
+                copyStream(zstdInput, output);
+            }
+        } else if (Files.exists(rawPath)) {
+            Files.copy(rawPath, targetFile, StandardCopyOption.REPLACE_EXISTING);
+        } else {
+            throw new IOException("STORED blob 物理文件不存在: " + blob.getFilePath());
+        }
+    }
+
+    private InputStream openStoredContent(BlobInfo blob) throws IOException {
+        Path compressedPath = resolveCompressedPath(blob.getFilePath(), blob.getFileHash());
+        if (Files.exists(compressedPath)) {
+            InputStream input = Files.newInputStream(compressedPath);
+            return new com.github.luben.zstd.ZstdInputStream(input);
+        }
+        Path rawPath = resolveRawPath(blob.getFilePath(), blob.getFileHash());
+        if (Files.exists(rawPath)) {
+            return Files.newInputStream(rawPath);
+        }
+        throw new IOException("STORED blob 物理文件不存在: " + blob.getFilePath());
+    }
+
+    private static void copyStream(InputStream input, OutputStream output) throws IOException {
+        byte[] buffer = new byte[65536];
+        int bytesRead;
+        while ((bytesRead = input.read(buffer)) != -1) {
+            output.write(buffer, 0, bytesRead);
         }
     }
 
