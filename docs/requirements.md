@@ -44,9 +44,11 @@
 | IN_PROGRESS | 仍有 blob 未完成迁移/压缩 |
 | COMPLETED | 所有 blob 均已 STORED |
 
-**实现状态：⚠️ 部分实现**
-- 当前代码：[`DatabaseManager`](core/src/main/java/io/github/limuqy/mc/backup/database/DatabaseManager.java)（SQLite）
-- 计划：CSV 默认 + SQLite（需 Minecraft SQLite JDBC 模组）+ MySQL 8（Mod shade mysql-connector-j）
+**实现状态：✅ 已实现**
+- 元数据存储：[`DatabaseManager`](core/src/main/java/io/github/limuqy/mc/backup/database/DatabaseManager.java) → [`MetadataStoreFactory`](core/src/main/java/io/github/limuqy/mc/backup/database/MetadataStoreFactory.java) 按配置创建后端
+- CSV 默认：[`CsvMetadataStore`](core/src/main/java/io/github/limuqy/mc/backup/database/csv/CsvMetadataStore.java)
+- SQLite：[`SqliteMetadataStore`](core/src/main/java/io/github/limuqy/mc/backup/database/sqlite/SqliteMetadataStore.java)（需 Minecraft SQLite JDBC 模组）
+- MySQL 8：[`MysqlMetadataStore`](core/src/main/java/io/github/limuqy/mc/backup/database/mysql/MysqlMetadataStore.java)（Mod shade mysql-connector-j）
 - 物理存储：[`BlobStore`](core/src/main/java/io/github/limuqy/mc/backup/storage/BlobStore.java)
 - 启动恢复：服务器启动时 `recoverOnStartup()` 恢复 PENDING 映射并重入队 STAGED blob
 
@@ -228,7 +230,7 @@ cli/                           # 停服离线 REPL / 单次命令
 | CSV（内置） | 默认元数据存储，无 JDBC |
 | SQLite JDBC | 可选；Mod 依赖 Minecraft SQLite JDBC 模组，CLI 内嵌 xerial |
 | mysql-connector-j | 可选 MySQL 8；Mod/CLI shade |
-| zstd-jni | ZSTD 压缩 |
+| zstd-jni | ZSTD 压缩；打包时仅保留 win/linux 的 x86/amd64/aarch64 原生库 |
 
 ### 5.3 数据库设计（schema v2）
 
@@ -289,7 +291,7 @@ CREATE TABLE file_info (
 | 功能 | 状态 |
 |------|------|
 | 增量备份 + blob 去重 + COW | ✅ |
-| 多元数据存储 schema v2 + 版本管理 | ⚠️ SQLite 已实现；CSV/MySQL 见 [metadata-storage.md](metadata-storage.md) |
+| 多元数据存储 schema v2 + 版本管理 | ✅ |
 | 命令（create/list/delete/export/migrate/status/config/clean） | ✅ |
 | ZSTD 异步压缩 + 双线程池 | ✅ |
 | 配置热更新 + 一键脚本 + CLI | ✅ |

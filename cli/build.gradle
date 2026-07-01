@@ -29,6 +29,17 @@ tasks.named('shadowJar') {
     archiveBaseName.set('instantbackup-cli')
     archiveClassifier.set('all')
     mergeServiceFiles()
+    // 排除不需要的平台原生库
+    exclude 'aix/**'
+    exclude 'darwin/**'
+    exclude 'freebsd/**'
+    exclude 'linux/arm/**'
+    exclude 'linux/loongarch64/**'
+    exclude 'linux/mips64/**'
+    exclude 'linux/ppc64/**'
+    exclude 'linux/ppc64le/**'
+    exclude 'linux/riscv64/**'
+    exclude 'linux/s390x/**'
 }
 
 tasks.named('build') {
