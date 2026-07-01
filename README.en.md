@@ -19,8 +19,8 @@
 
 > Repository: [github.com/limuqy/InstantBackup](https://github.com/limuqy/InstantBackup)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.18.2–1.21.x-green.svg)](https://www.minecraft.net/)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.16.5–26.2-green.svg)](https://www.minecraft.net/)
 [![Loaders](https://img.shields.io/badge/Loaders-Fabric%20%7C%20Forge%20%7C%20NeoForge-orange.svg)](#supported-versions)
 
 ---
@@ -45,25 +45,26 @@
 
 ## Supported Versions
 
-### Recommended & QA scope
+| Minecraft | Java | Fabric | Forge | NeoForge |
+|-----------|:----:|:------:|:-----:|:--------:|
+| 1.16.5 | 8 | ✅ | ✅ | — |
+| 1.17.1 | 16 | ✅ | ✅ | — |
+| 1.18.2 | 17 | ✅ | ✅ | — |
+| 1.19.4 | 17 | ✅ | ✅ | — |
+| 1.20.1 | 17 | ✅ | ✅ | ✅ |
+| 1.20.4 | 21 | ✅ | ✅ | ✅ |
+| 1.20.6 | 21 | ✅ | ✅ | ✅ |
+| 1.21.4 | 21 | ✅ | ✅ | ✅ |
+| 1.21.11 | 21 | ✅ | ✅ | ✅ |
+| 26.2 | 25 | ✅ | ✅ | ✅ |
 
-The following anchor versions are **recommended for production use and QA**:
-
-| Minecraft | Fabric | Forge | NeoForge |
-|-----------|:------:|:-----:|:--------:|
-| 1.18.2 | ✅ | ✅ | — |
-| 1.19.4 | ✅ | ✅ | — |
-| 1.20.1 | ✅ | ✅ | ✅ |
-| 1.20.4 | ✅ | ✅ | ✅ |
-| 1.21.1 | ✅ | ✅ | ✅ |
-| 1.21.4 | ✅ | ✅ | ✅ |
-
-> **Note:** 1.16.5 still has build support and compat layers, but is **outside the current QA scope**. Loader combinations per version are defined in `versionProperties/<version>.properties` (`builds_for`).
+> Each anchor's `compatible_mc_versions` covers patch releases in the same series (e.g. the 1.20.1 anchor supports 1.20–1.20.4). Loader combinations are defined in `builds_for` within `versionProperties/<version>.properties`.
 
 Build a specific version:
 
 ```bash
 ./gradlew build -Pmc_ver=1.20.1
+# Full anchor list: see versionProperties/
 ```
 
 ---
@@ -232,14 +233,14 @@ Trigger (/backup create | scheduler | CLI)
 
 ## Building from Source
 
-**Requirements:** JDK 17+ (some anchors downgrade bytecode to Java 8 / 17). Gradle Wrapper included.
+**Requirements:** JDK 25+ (required for the 26.2 Java 25 target; older anchors use JVMDowngrader for bytecode downleveling). Gradle Wrapper included.
 
 ```bash
 # Build default version (mc_ver=1.20.1 in gradle.properties)
 ./gradlew build
 
 # Build a specific MC version
-./gradlew build -Pmc_ver=1.21.1
+./gradlew build -Pmc_ver=1.21.11
 
 # Fabric only
 ./gradlew :fabric:build -Pmc_ver=1.20.1
@@ -277,7 +278,7 @@ InstantBackup/
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [GNU General Public License v3.0 or later](LICENSE).
 
 ---
 

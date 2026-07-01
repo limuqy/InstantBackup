@@ -19,8 +19,8 @@
 
 > 仓库地址：[github.com/limuqy/InstantBackup](https://github.com/limuqy/InstantBackup)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.18.2–1.21.x-green.svg)](https://www.minecraft.net/)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.16.5–26.2-green.svg)](https://www.minecraft.net/)
 [![Loaders](https://img.shields.io/badge/Loaders-Fabric%20%7C%20Forge%20%7C%20NeoForge-orange.svg)](#支持的版本)
 
 ---
@@ -45,25 +45,26 @@
 
 ## 支持的版本
 
-### 验收与推荐
+| Minecraft | Java | Fabric | Forge | NeoForge |
+|-----------|:----:|:------:|:-----:|:--------:|
+| 1.16.5 | 8 | ✅ | ✅ | — |
+| 1.17.1 | 16 | ✅ | ✅ | — |
+| 1.18.2 | 17 | ✅ | ✅ | — |
+| 1.19.4 | 17 | ✅ | ✅ | — |
+| 1.20.1 | 17 | ✅ | ✅ | ✅ |
+| 1.20.4 | 21 | ✅ | ✅ | ✅ |
+| 1.20.6 | 21 | ✅ | ✅ | ✅ |
+| 1.21.4 | 21 | ✅ | ✅ | ✅ |
+| 1.21.11 | 21 | ✅ | ✅ | ✅ |
+| 26.2 | 25 | ✅ | ✅ | ✅ |
 
-以下锚点版本为**功能验收与日常使用**的推荐范围：
-
-| Minecraft | Fabric | Forge | NeoForge |
-|-----------|:------:|:-----:|:--------:|
-| 1.18.2 | ✅ | ✅ | — |
-| 1.19.4 | ✅ | ✅ | — |
-| 1.20.1 | ✅ | ✅ | ✅ |
-| 1.20.4 | ✅ | ✅ | ✅ |
-| 1.21.1 | ✅ | ✅ | ✅ |
-| 1.21.4 | ✅ | ✅ | ✅ |
-
-> **说明：** 1.16.5 仍保留构建支持与 compat 层，但**不在当前项目验收范围内**。各版本具体 Loader 组合由 `versionProperties/<version>.properties` 中的 `builds_for` 决定。
+> 各锚点的 `compatible_mc_versions` 覆盖同系列补丁版（如 1.20.1 锚点兼容 1.20–1.20.4）。Loader 组合由 `versionProperties/<version>.properties` 中的 `builds_for` 决定。
 
 构建指定版本：
 
 ```bash
 ./gradlew build -Pmc_ver=1.20.1
+# 完整锚点列表见 versionProperties/
 ```
 
 ---
@@ -232,14 +233,14 @@ java -jar instantbackup-cli-1.0.0-all.jar --server-dir /path/to/server create "c
 
 ## 从源码构建
 
-**环境要求：** JDK 17+（部分锚点字节码降级至 Java 8 / 17），Gradle Wrapper 已包含。
+**环境要求：** JDK 25+（编译 26.2 目标所需；低版本锚点由 JVMDowngrader 降级字节码）。Gradle Wrapper 已包含。
 
 ```bash
-# 构建当前默认版本（gradle.properties 中 mc_ver=1.20.1）
+# 构建默认版本（gradle.properties 中 mc_ver=1.20.1）
 ./gradlew build
 
 # 构建指定 MC 版本
-./gradlew build -Pmc_ver=1.21.1
+./gradlew build -Pmc_ver=1.21.11
 
 # 仅构建 Fabric
 ./gradlew :fabric:build -Pmc_ver=1.20.1
@@ -277,7 +278,7 @@ InstantBackup/
 
 ## 许可证
 
-本项目采用 [MIT License](LICENSE) 开源。
+本项目采用 [GNU General Public License v3.0 or later](LICENSE) 开源。
 
 ---
 

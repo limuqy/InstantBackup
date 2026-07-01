@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.EnumSet;
 import java.util.Set;
@@ -37,10 +38,10 @@ public final class ScriptGenerator {
             String serverPath = serverDir.toAbsolutePath().normalize().toString();
 
             Path cmdPath = configDir.resolve(CMD_FILE);
-            Files.writeString(cmdPath, buildCmdScript(javaBinary, modPath, serverPath), StandardCharsets.UTF_8);
+            Files.write(cmdPath, buildCmdScript(javaBinary, modPath, serverPath).getBytes(StandardCharsets.UTF_8));
 
             Path shPath = configDir.resolve(SH_FILE);
-            Files.writeString(shPath, buildShScript(javaBinary, modPath, serverPath), StandardCharsets.UTF_8);
+            Files.write(shPath, buildShScript(javaBinary, modPath, serverPath).getBytes(StandardCharsets.UTF_8));
             makeExecutable(shPath);
 
             ModLog.info("[Instant Backup] 已生成一键脚本: {}, {}", cmdPath, shPath);
@@ -50,7 +51,7 @@ public final class ScriptGenerator {
     }
 
     private static String resolveJavaBinary() {
-        Path javaHome = Path.of(System.getProperty("java.home"));
+        Path javaHome = Paths.get(System.getProperty("java.home"));
         Path javaExe = javaHome.resolve("bin").resolve(isWindows() ? "java.exe" : "java");
         if (Files.isRegularFile(javaExe)) {
             return javaExe.toAbsolutePath().normalize().toString();
@@ -59,20 +60,16 @@ public final class ScriptGenerator {
     }
 
     private static String buildCmdScript(String javaBinary, String modPath, String serverDir) {
-        return """
-            @echo off
-            chcp 65001 >nul
-            title 极速备份
-            "%s" -cp "%s" %s --server-dir "%s" --interactive
-            pause
-            """.formatted(escapeCmd(javaBinary), escapeCmd(modPath), MAIN_CLASS, escapeCmd(serverDir));
+        return "@echo off\n"
+            + "chcp 65001 >nul\n"
+            + "title 极速备份\n"
+            + "\"" + escapeCmd(javaBinary) + "\" -cp \"" + escapeCmd(modPath) + "\" " + MAIN_CLASS + " --server-dir \"" + escapeCmd(serverDir) + "\" --interactive\n"
+            + "pause\n";
     }
 
     private static String buildShScript(String javaBinary, String modPath, String serverDir) {
-        return """
-            #!/usr/bin/env bash
-            exec '%s' -cp '%s' %s --server-dir '%s' --interactive
-            """.formatted(escapeSh(javaBinary), escapeSh(modPath), MAIN_CLASS, escapeSh(serverDir));
+        return "#!/usr/bin/env bash\n"
+            + "exec '" + escapeSh(javaBinary) + "' -cp '" + escapeSh(modPath) + "' " + MAIN_CLASS + " --server-dir '" + escapeSh(serverDir) + "' --interactive\n";
     }
 
     private static String escapeCmd(String value) {

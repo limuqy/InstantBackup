@@ -65,6 +65,8 @@ unimined-*.gradle  → 各 loader 依赖与 runClient/runServer
 
 `settings.gradle` 按 `versionProperties` 中 `builds_for` 动态 include 子模块。
 
+有效 `-Pmc_ver` 锚点：`1.16.5`, `1.17.1`, `1.18.2`, `1.19.4`, `1.20.1`, `1.20.4`, `1.20.6`, `1.21.4`, `1.21.11`, `26.2`（详见 `versionProperties/`）。开发环境需 JDK 25+。
+
 ## 数据库表（简要）
 
 - `backup_versions` — 版本元数据（名称、时间、file_count、total_size、status）

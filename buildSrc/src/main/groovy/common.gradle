@@ -15,6 +15,10 @@ manifold {
 }
 
 repositories {
+    maven {
+        name = 'Aliyun Maven Public'
+        url = uri('https://maven.aliyun.com/repository/public')
+    }
     mavenCentral()
 }
 
@@ -48,6 +52,10 @@ processResources {
     inputs.properties(expandProps)
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
 jvmdg.downgradeTo = JavaVersion.toVersion(gradle.ext.java_version)
 downgradeJar.archiveClassifier.set(null)
 shadeDowngradedApi.archiveClassifier.set(null)
@@ -57,4 +65,12 @@ tasks.withType(GenerateModuleMetadata).configureEach {
 }
 tasks.withType(Sign).configureEach {
     enabled = false
+}
+
+configurations.configureEach {
+    resolutionStrategy.capabilitiesResolution.withCapability('org.lz4:lz4-java') {
+        // MC / 传递依赖可能仍拉旧 org.lz4，统一选 at.yawk.lz4 fork
+        def preferred = candidates.find { it.id.group == 'at.yawk.lz4' }
+        select(preferred ?: candidates.first())
+    }
 }

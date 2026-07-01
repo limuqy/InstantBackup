@@ -2,6 +2,7 @@ package io.github.limuqy.mc.backup;
 
 import io.github.limuqy.mc.backup.backup.BackupEngine;
 import io.github.limuqy.mc.backup.backup.BackupManager;
+import io.github.limuqy.mc.backup.compat.ServerCompat;
 import io.github.limuqy.mc.backup.config.BackupConfig;
 import io.github.limuqy.mc.backup.config.BackupPaths;
 import io.github.limuqy.mc.backup.database.DatabaseManager;
@@ -66,14 +67,14 @@ public class ExampleMod {
     public void onServerStarting(MinecraftServer server) {
         this.server = server;
         this.worldPath = server.getWorldPath(LevelResource.ROOT);
-        this.configDir = server.getServerDirectory().toPath().resolve("config").resolve(MOD_ID);
+        this.configDir = ServerCompat.getServerDirectory(server).resolve("config").resolve(MOD_ID);
 
         // 初始化配置
         BackupConfig.init(configDir);
         ModI18n.reload();
 
         // 备份目录由 storage.path 配置决定（支持绝对路径跨盘符）
-        Path serverRoot = server.getServerDirectory().toPath().toAbsolutePath().normalize();
+        Path serverRoot = ServerCompat.getServerDirectory(server).toAbsolutePath().normalize();
         this.backupPath = BackupPaths.resolveBackupPath(serverRoot, BackupConfig.getStoragePath());
 
         // 数据库文件和配置文件同级: config/backups.db

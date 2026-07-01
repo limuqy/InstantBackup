@@ -11,7 +11,7 @@ public final class CommandCompat {
     }
 
     public static void sendSuccess(CommandSourceStack source, Component message) {
-#if MC_VER < MC_1_20_1
+#if MC_VER <= MC_1_19_4
         source.sendSuccess(message, false);
 #else
         source.sendSuccess(() -> message, false);

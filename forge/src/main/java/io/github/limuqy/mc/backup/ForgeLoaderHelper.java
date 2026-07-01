@@ -4,10 +4,14 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
+#if MC_VER <= MC_1_16_5
+import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
+#endif
 import net.minecraftforge.forgespi.language.IModInfo;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -19,8 +23,11 @@ public class ForgeLoaderHelper implements LoaderHelper {
 
     @Override
     public String getModVersion() {
-        return ModList.get()
-                .getModContainerById(ExampleMod.MOD_ID)
+#if MC_VER < MC_26_2
+        return ModList.get().getModContainerById(ExampleMod.MOD_ID)
+#else
+        return ModList.getModContainerById(ExampleMod.MOD_ID)
+#endif
                 .map(container -> container.getModInfo().getVersion().toString())
                 .orElse("unknown");
     }
@@ -32,9 +39,16 @@ public class ForgeLoaderHelper implements LoaderHelper {
 
     @Override
     public Path getModRootPath() {
-        return ModList.get()
-            .getModContainerById(ExampleMod.MOD_ID)
+#if MC_VER < MC_26_2
+        return ModList.get().getModContainerById(ExampleMod.MOD_ID)
+#else
+        return ModList.getModContainerById(ExampleMod.MOD_ID)
+#endif
+#if MC_VER <= MC_1_16_5
+            .map(container -> resolveModRootPath(((ModFileInfo) container.getModInfo().getOwningFile()).getFile().getFilePath()))
+#else
             .map(container -> resolveModRootPath(container.getModInfo().getOwningFile().getFile().getFilePath()))
+#endif
             .orElseThrow(() -> new IllegalStateException("找不到 Instant Backup mod 容器"));
     }
 
@@ -66,7 +80,7 @@ public class ForgeLoaderHelper implements LoaderHelper {
         if (index < 0) {
             return null;
         }
-        Path candidate = Path.of(normalized.substring(0, index), "classes", "java", "main");
+        Path candidate = Paths.get(normalized.substring(0, index), "classes", "java", "main");
         return Files.isDirectory(candidate) ? candidate : null;
     }
 
@@ -92,7 +106,11 @@ public class ForgeLoaderHelper implements LoaderHelper {
 
     @Override
     public List<String> getModList() {
+#if MC_VER < MC_26_2
         return ModList.get().getMods().stream()
+#else
+        return ModList.getMods().stream()
+#endif
                 .map(IModInfo::getModId)
                 .collect(Collectors.toList());
     }

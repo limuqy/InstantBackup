@@ -4,5 +4,8 @@ java {
     targetCompatibility = JavaVersion.toVersion(javaVer)
 }
 tasks.withType(JavaCompile).configureEach {
-    options.release = javaVer
+    options.encoding = 'UTF-8'
+    if (javaVer >= 9) {
+        options.release = javaVer
+    }
 }

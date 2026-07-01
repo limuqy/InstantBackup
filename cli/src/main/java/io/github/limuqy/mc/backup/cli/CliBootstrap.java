@@ -275,7 +275,7 @@ public final class CliBootstrap {
         if (current.length() > 0) {
             tokens.add(current.toString());
         }
-        return tokens.toArray(String[]::new);
+        return tokens.toArray(new String[]{});
     }
 
     public static void printUsage() {

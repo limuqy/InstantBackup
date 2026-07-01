@@ -1,37 +1,1 @@
-package io.github.limuqy.mc.backup.compat;
-
-import io.github.limuqy.mc.backup.i18n.ModI18n;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-
-/**
- * 跨版本 Chat/Component API 兼容层。
- */
-public final class ChatCompat {
-    private ChatCompat() {
-    }
-
-    public static MutableComponent empty() {
-#if MC_VER < MC_1_19_4
-        return new net.minecraft.network.chat.TextComponent("");
-#else
-        return Component.empty();
-#endif
-    }
-
-    public static MutableComponent literal(String text) {
-#if MC_VER < MC_1_19_4
-        return new net.minecraft.network.chat.TextComponent(text);
-#else
-        return Component.literal(text);
-#endif
-    }
-
-    public static Component translatable(String key, Object... args) {
-        return literal(ModI18n.format(key, args));
-    }
-
-    public static String getPlainText(Component component) {
-        return component.getString();
-    }
-}
+package io.github.limuqy.mc.backup.compat;import io.github.limuqy.mc.backup.i18n.ModI18n;import net.minecraft.network.chat.Component;import net.minecraft.network.chat.MutableComponent;/** * 跨版本 Chat/Component API 兼容层。 */public final class ChatCompat {    private ChatCompat() {    }    public static MutableComponent empty() {#if MC_VER <= MC_1_18_2        return new net.minecraft.network.chat.TextComponent("");#else        return Component.empty();#endif    }    public static MutableComponent literal(String text) {#if MC_VER <= MC_1_18_2        return new net.minecraft.network.chat.TextComponent(text);#else        return Component.literal(text);#endif    }    public static Component translatable(String key, Object... args) {        return literal(ModI18n.format(key, args));    }    public static String getPlainText(Component component) {        return component.getString();    }}

@@ -23,18 +23,18 @@ public class BackupCommandHandler {
         }
 
         String subCommand = args[0].toLowerCase();
-        return switch (subCommand) {
-            case "help" -> Messages.help();
-            case "create" -> createBackup(args);
-            case "list" -> listVersions();
-            case "delete" -> deleteVersion(args);
-            case "export" -> exportVersion(args);
-            case "migrate" -> migrateVersions(args);
-            case "status" -> showStatus();
-            case "config" -> showConfig(args);
-            case "clean" -> cleanBackups();
-            default -> Messages.unknownCommand(subCommand);
-        };
+        switch (subCommand) {
+            case "help": return Messages.help();
+            case "create": return createBackup(args);
+            case "list": return listVersions();
+            case "delete": return deleteVersion(args);
+            case "export": return exportVersion(args);
+            case "migrate": return migrateVersions(args);
+            case "status": return showStatus();
+            case "config": return showConfig(args);
+            case "clean": return cleanBackups();
+            default: return Messages.unknownCommand(subCommand);
+        }
     }
 
     private static Component createBackup(String[] args) {
@@ -143,72 +143,85 @@ public class BackupCommandHandler {
         String value = args[2];
 
         try {
-            return switch (key) {
-                case "interval" -> {
+            Component result;
+            switch (key) {
+                case "interval":
                     BackupConfig.setBackupInterval(Integer.parseInt(value));
-                    yield ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_INTERVAL, value);
-                }
-                case "enabled" -> {
+                    result = ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_INTERVAL, value);
+                    break;
+                case "enabled": {
                     boolean enabled = Boolean.parseBoolean(value);
                     BackupConfig.setEnabled(enabled);
-                    yield ChatCompat.translatable(
+                    result = ChatCompat.translatable(
                         LangKeys.COMMAND_CONFIG_SET_ENABLED,
                         Messages.enabledDisabled(enabled)
                     );
+                    break;
                 }
-                case "online_only" -> {
+                case "online_only": {
                     boolean enabled = Boolean.parseBoolean(value);
                     BackupConfig.setOnlyWhenPlayersOnline(enabled);
-                    yield ChatCompat.translatable(
+                    result = ChatCompat.translatable(
                         LangKeys.COMMAND_CONFIG_SET_ONLINE_ONLY,
                         Messages.enabledDisabled(enabled)
                     );
+                    break;
                 }
-                case "exclude_bots" -> {
+                case "exclude_bots": {
                     boolean enabled = Boolean.parseBoolean(value);
                     BackupConfig.setExcludeCarpetBots(enabled);
-                    yield ChatCompat.translatable(
+                    result = ChatCompat.translatable(
                         LangKeys.COMMAND_CONFIG_SET_EXCLUDE_BOTS,
                         Messages.enabledDisabled(enabled)
                     );
+                    break;
                 }
-                case "compression" -> {
+                case "compression": {
                     int level = Integer.parseInt(value);
                     if (level < 1 || level > 22) {
-                        yield ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_COMPRESSION_INVALID);
+                        result = ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_COMPRESSION_INVALID);
+                    } else {
+                        BackupConfig.setCompressionLevel(level);
+                        result = ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_COMPRESSION, level);
                     }
-                    BackupConfig.setCompressionLevel(level);
-                    yield ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_COMPRESSION, level);
+                    break;
                 }
-                case "threads" -> {
+                case "threads":
                     BackupConfig.setThreadCount(Integer.parseInt(value));
                     threadPool.updateThreadCount();
-                    yield ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_THREADS, value);
-                }
-                case "max_versions" -> {
+                    result = ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_THREADS, value);
+                    break;
+                case "max_versions":
                     BackupConfig.setMaxVersions(Integer.parseInt(value));
-                    yield ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_MAX_VERSIONS, value);
-                }
-                case "path" -> {
+                    result = ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_MAX_VERSIONS, value);
+                    break;
+                case "path": {
                     if (!BackupConfig.setStoragePath(value)) {
-                        yield ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_PATH_INVALID);
+                        result = ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_PATH_INVALID);
+                    } else {
+                        result = ChatCompat.empty()
+                            .append(ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_PATH, value))
+                            .append("\n")
+                            .append(ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_PATH_RESTART));
                     }
-                    yield ChatCompat.empty()
-                        .append(ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_PATH, value))
-                        .append("\n")
-                        .append(ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_PATH_RESTART));
+                    break;
                 }
-                case "language" -> {
+                case "language": {
                     String normalized = ModI18n.normalizeLanguage(value);
                     if (normalized == null) {
-                        yield ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_LANGUAGE_INVALID, value);
+                        result = ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_LANGUAGE_INVALID, value);
+                    } else {
+                        BackupConfig.setLanguage(normalized);
+                        ModI18n.reload();
+                        result = ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_LANGUAGE, normalized);
                     }
-                    BackupConfig.setLanguage(normalized);
-                    ModI18n.reload();
-                    yield ChatCompat.translatable(LangKeys.COMMAND_CONFIG_SET_LANGUAGE, normalized);
+                    break;
                 }
-                default -> ChatCompat.translatable(LangKeys.COMMAND_CONFIG_UNKNOWN_KEY, key);
-            };
+                default:
+                    result = ChatCompat.translatable(LangKeys.COMMAND_CONFIG_UNKNOWN_KEY, key);
+                    break;
+            }
+            return result;
         } catch (NumberFormatException e) {
             return ChatCompat.translatable(LangKeys.COMMAND_CONFIG_INVALID_NUMBER, value);
         }

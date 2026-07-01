@@ -1,6 +1,6 @@
 # 极速备份 功能测试文档
 
-> **验收范围：** 本文档用例以 **1.18.2 / 1.19.4 / 1.20.1 / 1.20.4 / 1.21.x** 锚点为验收对象。**1.16.5 不在项目验收范围内**，无需执行本文档回归测试。详见 [`requirements.md`](requirements.md) 开头说明。
+> 本文档用例适用于所有已支持锚点（1.16.5 – 26.2）。示例命令默认 `-Pmc_ver=1.20.1`，测试其他版本时替换该参数即可。功能需求详见 [`requirements.md`](requirements.md)。
 
 ## 一、测试环境准备
 
@@ -460,6 +460,8 @@ SELECT state, COUNT(*) FROM blobs GROUP BY state;
 ./gradlew :forge:runClient -Pmc_ver=1.20.1
 ./gradlew :forge:runServer -Pmc_ver=1.20.1
 ```
+
+> NeoForge 仅 1.20.1 及以上锚点可用（见各版本 `versionProperties/<version>.properties` 中的 `builds_for`）。
 
 **验证点：**
 - 模组正确加载

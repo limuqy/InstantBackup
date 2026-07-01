@@ -2,6 +2,7 @@ plugins {
     id 'minecraft'
 }
 
+// 旧版 MC（builds_for 无 neoforge）的 combineWith/canCombine 策略见 minecraft.gradle
 unimined.minecraft {
     forge {
         loader gradle.ext.has('forge_loader') ? gradle.ext.forge_loader : ''

@@ -1,6 +1,6 @@
 plugins {
     id 'application'
-    id 'com.gradleup.shadow' version '8.3.5'
+    id 'com.gradleup.shadow' version '9.0.2'
 }
 
 group = rootProject.group
@@ -8,8 +8,10 @@ version = mod_version
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/library-java.gradle"
 
+apply from: "${rootDir}/gradle/mirror-repos.gradle"
+
 repositories {
-    mavenCentral()
+    addMavenCentralMirror(delegate)
 }
 
 dependencies {

@@ -7,7 +7,7 @@ public final class ModLog {
     private ModLog() {
     }
 
-#if MC_VER < MC_1_19_4
+#if MC_VER <= MC_1_18_2
     private static final org.apache.logging.log4j.Logger LOG =
         org.apache.logging.log4j.LogManager.getLogger("InstantBackup");
 #else

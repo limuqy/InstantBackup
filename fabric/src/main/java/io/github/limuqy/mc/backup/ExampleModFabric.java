@@ -1,7 +1,7 @@
 package io.github.limuqy.mc.backup;
 
 import net.fabricmc.api.ModInitializer;
-#if MC_VER < MC_1_19_4
+#if MC_VER <= MC_1_18_2
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 #else
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -17,7 +17,7 @@ public class ExampleModFabric implements ModInitializer {
     public void onInitialize() {
         ExampleMod.initializeForServer(new FabricLoaderHelper());
 
-#if MC_VER < MC_1_19_4
+#if MC_VER <= MC_1_18_2
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) ->
             ExampleMod.mod().getLoaderHelper().registerCommand(dispatcher));
 #else

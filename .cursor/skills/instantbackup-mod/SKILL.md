@@ -75,6 +75,8 @@ SERVER_STOPPING
 
 ## 构建与测试
 
+**环境要求：** JDK 25+（编译 26.2 目标所需；低版本锚点由 JVMDowngrader 降级）。
+
 ```bash
 # Mod 构建
 ./gradlew build "-Pmc_ver=1.20.1"
@@ -86,8 +88,8 @@ SERVER_STOPPING
 ```
 
 ```powershell
-# 锚点版本全矩阵（本地）
-$versions = @("1.16.5","1.18.2","1.19.4","1.20.1","1.20.4","1.21.1","1.21.4")
+# 全锚点构建（本地）
+$versions = @("1.16.5","1.17.1","1.18.2","1.19.4","1.20.1","1.20.4","1.20.6","1.21.4","1.21.11","26.2")
 foreach ($v in $versions) { ./gradlew build "-Pmc_ver=$v" }
 
 # 启动测试服务器（runServer 已注入 selftest JVM 参数）
@@ -121,15 +123,21 @@ powershell -File scripts/verify_backup_rcon.ps1
 | 锚点 | Java | Loader |
 |------|------|--------|
 | 1.16.5 | 8 | fabric, forge |
+| 1.17.1 | 16 | fabric, forge |
 | 1.18.2 / 1.19.4 | 17 | fabric, forge |
-| 1.20.1+ | 17/21 | fabric, forge, neoforge（1.20.1 起） |
+| 1.20.1 | 17 | fabric, forge, neoforge |
+| 1.20.4 / 1.20.6 | 21 | fabric, forge, neoforge |
+| 1.21.4 / 1.21.11 | 21 | fabric, forge, neoforge |
+| 26.2 | 25 | fabric, forge, neoforge |
+
+有效 `mc_ver`：`1.16.5`, `1.17.1`, `1.18.2`, `1.19.4`, `1.20.1`, `1.20.4`, `1.20.6`, `1.21.4`, `1.21.11`, `26.2`（对应 `versionProperties/<version>.properties`）
 
 配置：`versionProperties/<version>.properties`（`builds_for`、`compatible_mc_versions`、`forge_loader_version_range`）
 
 ### Manifold 预处理
 
 - 常量由 [root.gradle](buildSrc/src/main/groovy/root.gradle) 生成（如 `MC_1_16_5=0`、`MC_VER=3`）
-- 同一源文件内分支：`#if MC_VER < MC_1_19_4` … `#else` … `#endif`
+- 同一源文件内分支：`#if MC_VER <= MC_1_18_2` … `#else` … `#endif`
 - **业务逻辑不放 `#if`**；版本差异沉入 `compat/` 或 loader 入口
 
 ### compat 兼容层（common/.../compat/）
@@ -151,7 +159,7 @@ powershell -File scripts/verify_backup_rcon.ps1
 
 ## 修改后检查清单
 
-- [ ] 各锚点 `./gradlew build "-Pmc_ver=X"` 通过（至少 1.16.5 / 1.20.1 / 1.21.1）
+- [ ] 改动涉及构建时，至少抽测 `1.16.5`、`1.20.1`、`1.21.11`（或 `26.2`）的 `./gradlew build "-Pmc_ver=X"` 通过
 - [ ] 改动在 common 中未引入 loader 专属 import
 - [ ] 三个 loader 入口生命周期保持一致
 - [ ] 异步任务异常可被日志捕获
@@ -160,5 +168,4 @@ powershell -File scripts/verify_backup_rcon.ps1
 ## 详细参考
 
 - 架构与备份流水线：[reference.md](reference.md)
-- 功能测试步骤：`docs/functional-testing.md`
-- 回归验证规范：`docs/testing.md`
+- 功能测试步骤：[docs/functional-testing.md](docs/functional-testing.md)

@@ -2,11 +2,9 @@
 
 ## 一、项目概述
 
-**极速备份**（Instant Backup）是一个 Minecraft 存档增量备份模组，采用多加载器架构（Fabric / Forge / NeoForge），从单一代码库构建多个 MC 锚点版本。模组提供基于 blob 去重的增量备份、区块 Copy-on-Write（COW）保护、异步 ZSTD 压缩，以及游戏内命令、停服 CLI 与一键脚本等多种操作方式。
+**极速备份**（Instant Backup）是一个 Minecraft 存档增量备份模组，采用多加载器架构（Fabric / Forge / NeoForge），从单一代码库构建多个 MC 锚点版本。支持 Minecraft **1.16.5 – 26.2**（10 个锚点，Loader 组合见 `versionProperties/<version>.properties` 中的 `builds_for`）。模组提供基于 blob 去重的增量备份、区块 Copy-on-Write（COW）保护、异步 ZSTD 压缩，以及游戏内命令、停服 CLI 与一键脚本等多种操作方式。
 
 **实现状态图例：** ✅ 已实现 · ⚠️ 部分实现 · ❌ 未实现
-
-**验收范围：** 以 **1.18.2 / 1.19.4 / 1.20.1 / 1.20.4 / 1.21.x** 锚点为验收对象（Fabric / Forge / NeoForge，按各版本 `builds_for` 配置）。**1.16.5 不在本次项目验收范围内**——代码库仍保留 1.16.5 构建支持与 compat 层，但不作为发布前功能验收与回归测试的必要条件。
 
 ---
 
@@ -118,7 +116,7 @@
 - `backup.only_when_players_online=true` 时，无玩家在线则跳过
 - `backup.exclude_carpet_bots=true` 时，排除 Carpet Mod 假人
 
-**实现状态：✅ 已实现**（验收锚点见文档开头「验收范围」）
+**实现状态：✅ 已实现**
 
 - 调度：[`BackupScheduler`](common/src/main/java/io/github/limuqy/mc/backup/scheduler/BackupScheduler.java)
 - tick 钩子：[`ServerTickMixin`](common/src/main/java/io/github/limuqy/mc/backup/mixins/ServerTickMixin.java) → [`BackupTickHandler`](common/src/main/java/io/github/limuqy/mc/backup/scheduler/BackupTickHandler.java)
@@ -307,18 +305,4 @@ CREATE TABLE file_info (
 2. **性能影响**：大量文件的 hash 计算与压缩占用 CPU/磁盘 I/O；通过异步线程池缓解
 3. **数据一致性**：PENDING blob 依赖 COW 时序；create 前自动 migrate 降低风险
 4. **跨版本支持**：多加载器 + 多 MC 锚点增加测试和维护成本
-5. **1.16.5 不在验收范围**：1.16.5 锚点仍可通过 `-Pmc_ver=1.16.5` 构建，但功能验收与回归测试以 1.18.2 及以上锚点为准
-
----
-
-## 八、验收标准
-
-> 以下标准适用于文档开头「验收范围」所列锚点；**1.16.5 不在验收范围内**。
-
-1. 能够正确识别并备份变化的文件；相同内容跨版本共享 blob
-2. 区块文件前 8KB XXHash64 摘要检测在常规使用下准确可靠
-3. 备份操作不阻塞主线程；服务器 TPS 保持 > 18（常规负载）
-4. 命令响应时间 < 1 秒（异步任务立即返回「已开始」消息）
-5. 开发环境 SelfTest（`-Dinstantbackup.selftest=true`）输出 `[SelfTest] PASS`
-6. 支持 1.18.2 – 1.21.x MC 锚点版本与 Fabric / Forge / NeoForge 构建（按各版本 `builds_for`）
-7. 定时备份按 `backup.interval` 自动触发；`online_only` / `exclude_bots` 条件判断正确
+5. **字节码降级**：低版本锚点（Java 8 / 16 / 17）需 JVMDowngrader 将编译产物降级至目标 Java 版本

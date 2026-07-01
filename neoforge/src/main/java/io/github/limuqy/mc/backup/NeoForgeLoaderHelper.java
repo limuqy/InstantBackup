@@ -2,9 +2,15 @@ package io.github.limuqy.mc.backup;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
+#if MC_VER < MC_1_20_6
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.forgespi.language.IModInfo;
+#else
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforgespi.language.IModInfo;
+#endif
 
 import java.nio.file.Files;
 import java.nio.file.Path;
