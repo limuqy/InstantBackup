@@ -17,14 +17,6 @@ unimined.minecraft {
         loader resolveNeoForgeLoader()
         useToolchains = false // Disable toolchains so modern java can be used
     }
-    mods {
-        modImplementation {
-            mixinRemap {
-                enableBaseMixin()
-                enableMixinExtra()
-            }
-        }
-    }
 }
 runClient.javaLauncher = null
 runServer {

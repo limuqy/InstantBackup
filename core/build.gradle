@@ -7,10 +7,8 @@ version = rootProject.version
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/library-java.gradle"
 
-apply from: "${rootDir}/gradle/mirror-repos.gradle"
-
 repositories {
-    addMavenCentralMirror(delegate)
+    mavenCentral()
 }
 
 dependencies {
