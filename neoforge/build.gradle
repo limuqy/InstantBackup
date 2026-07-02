@@ -16,6 +16,7 @@ dependencies {
     library 'com.mysql:mysql-connector-j:8.4.0'
     library 'com.github.luben:zstd-jni:1.5.6-8'
     library 'at.yawk.lz4:lz4-java:1.8.1'
+    library 'com.opencsv:opencsv:4.6'
 }
 
 // Shade external dependencies into the mod jar
@@ -31,7 +32,7 @@ jar {
             it.name.contains('commons-collections4')
         }.collect { zipTree(it) }
     }) {
-        exclude 'META-INF/**'
+//        exclude 'META-INF/**'
         // 排除不需要的平台原生库，仅保留 win/linux 的 x86/amd64/aarch64
         exclude 'aix/**'
         exclude 'darwin/**'
