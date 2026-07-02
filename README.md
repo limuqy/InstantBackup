@@ -58,7 +58,7 @@
 | 1.21.11 | 21 | ✅ | ✅ | ✅ |
 | 26.2 | 25 | ✅ | ✅ | ✅ |
 
-> 各锚点的 `compatible_mc_versions` 覆盖同系列补丁版（如 1.20.1 锚点兼容 1.20–1.20.4）。Loader 组合由 `versionProperties/<version>.properties` 中的 `builds_for` 决定。
+> 各锚点的 `compatible_mc_version_range` 声明同系列补丁版兼容范围（如 1.20.1 锚点为 `[1.20,1.21)`，覆盖 1.20–1.20.4）。Loader 组合由 `versionProperties/<version>.properties` 中的 `builds_for` 决定。
 
 构建指定版本：
 

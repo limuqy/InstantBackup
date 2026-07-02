@@ -132,7 +132,7 @@ powershell -File scripts/verify_backup_rcon.ps1
 
 有效 `mc_ver`：`1.16.5`, `1.17.1`, `1.18.2`, `1.19.4`, `1.20.1`, `1.20.4`, `1.20.6`, `1.21.4`, `1.21.11`, `26.2`（对应 `versionProperties/<version>.properties`）
 
-配置：`versionProperties/<version>.properties`（`builds_for`、`compatible_mc_versions`、`forge_loader_version_range`）
+配置：`versionProperties/<version>.properties`（`builds_for`、`compatible_mc_version_range`、`forge_loader_version_range`）
 
 ### Manifold 预处理
 

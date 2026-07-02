@@ -58,7 +58,7 @@
 | 1.21.11 | 21 | ✅ | ✅ | ✅ |
 | 26.2 | 25 | ✅ | ✅ | ✅ |
 
-> Each anchor's `compatible_mc_versions` covers patch releases in the same series (e.g. the 1.20.1 anchor supports 1.20–1.20.4). Loader combinations are defined in `builds_for` within `versionProperties/<version>.properties`.
+> Each anchor's `compatible_mc_version_range` declares compatible patch releases in the same series (e.g. the 1.20.1 anchor uses `[1.20,1.21)` for 1.20–1.20.4). Loader combinations are defined in `builds_for` within `versionProperties/<version>.properties`.
 
 Build a specific version:
 

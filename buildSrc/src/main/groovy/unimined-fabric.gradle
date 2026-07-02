@@ -6,6 +6,14 @@ unimined.minecraft {
     fabric {
         loader gradle.ext.fabric_loader
     }
+    // Fabric Loader 在运行时 remap mixin；dev 环境关闭预 remap，否则 modImplementation 无法被正确发现
+    mods {
+        modImplementation {
+            mixinRemap {
+                off()
+            }
+        }
+    }
 }
 
 runClient {

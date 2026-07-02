@@ -22,13 +22,6 @@ unimined.minecraft(sourceSets.main, true) {
         combineWith project(":core"), project(":core").sourceSets.main
         combineWith project(":common"), project(":common").sourceSets.main
     }
-
-    mods.modImplementation {
-        mixinRemap {
-            enableBaseMixin()
-            enableMixinExtra()
-        }
-    }
 }
 
 // 1.20.1 以下（无 NeoForge）：手动合并 common/core，走经典 Forge Maven 坐标

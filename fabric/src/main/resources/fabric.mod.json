@@ -23,6 +23,6 @@
   "depends": {
     "fabricloader": "*",
     "fabric-api": "*",
-    "minecraft": "${minecraft_version}"
+    "minecraft": "${compatible_fabric_mc_version_range}"
   }
 }

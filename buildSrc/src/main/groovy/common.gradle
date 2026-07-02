@@ -28,13 +28,15 @@ dependencies {
 }
 
 processResources {
-    def compatible_forgemc_versions = "${gradle.ext.compatible_mc_versions}".replaceAll("\"", "").replaceAll("]", ",)")
+    def mcRange = gradle.ext.compatible_mc_version_range as String
+    def m = mcRange =~ /\[([^,\]]+),([^)\]]+)\)/
+    def compatible_fabric_mc_version_range = m ? ">=${m[0][1]} <${m[0][2]}" : gradle.ext.minecraft_version
 
-    var expandProps = ['version'                      : mod_version,
-                       'group'                        : project.group,
-                       'minecraft_version'            : gradle.ext.minecraft_version,
-                       'compatible_mc_versions'       : gradle.ext.compatible_mc_versions,
-                       'compatible_forgemc_versions'  : compatible_forgemc_versions,
+    var expandProps = ['version'                              : mod_version,
+                       'group'                                : project.group,
+                       'minecraft_version'                    : gradle.ext.minecraft_version,
+                       'compatible_mc_version_range'          : mcRange,
+                       'compatible_fabric_mc_version_range'   : compatible_fabric_mc_version_range,
                        'mod_name'                     : mod_name,
                        'mod_authors'                  : mod_authors,
                        'mod_id'                       : mod_id,
