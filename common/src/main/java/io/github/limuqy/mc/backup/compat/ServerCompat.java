@@ -21,10 +21,6 @@ public final class ServerCompat {
     }
 
     public static void saveEverything(MinecraftServer server, boolean flush, boolean force, boolean logSuccess) {
-#if MC_VER <= MC_1_17_1
-        server.saveAllChunks(flush, force, logSuccess);
-#else
         server.saveEverything(flush, force, logSuccess);
-#endif
     }
 }

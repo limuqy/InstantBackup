@@ -2,11 +2,7 @@ package io.github.limuqy.mc.backup;
 
 import io.github.limuqy.mc.backup.compat.ModLog;
 import net.minecraftforge.event.RegisterCommandsEvent;
-#if MC_VER < MC_1_17_1
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
-#elif MC_VER < MC_1_18_2
+#if MC_VER < MC_1_18_2
 import net.minecraftforge.fmlserverevents.FMLServerStartedEvent;
 import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import net.minecraftforge.fmlserverevents.FMLServerStoppedEvent;
@@ -34,24 +30,6 @@ public class ExampleModForge {
         ModLog.info("[Instant Backup] Forge 模组已加载，等待服务器启动...");
     }
 
-#if MC_VER < MC_1_18_2
-    @SubscribeEvent
-    public void onServerStarting(FMLServerStartingEvent event) {
-        ExampleMod.mod().onServerStarting(event.getServer());
-    }
-
-    @SubscribeEvent
-    public void onServerStarted(FMLServerStartedEvent event) {
-        if (Boolean.getBoolean("instantbackup.selftest")) {
-            io.github.limuqy.mc.backup.test.BackupSelfTest.run(ExampleMod.mod().getBackupPath());
-        }
-    }
-
-    @SubscribeEvent
-    public void onServerStopping(FMLServerStoppedEvent event) {
-        ExampleMod.mod().onServerStopping();
-    }
-#else
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         ExampleMod.mod().onServerStarting(event.getServer());
@@ -68,7 +46,6 @@ public class ExampleModForge {
     public void onServerStopping(ServerStoppingEvent event) {
         ExampleMod.mod().onServerStopping();
     }
-#endif
 
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {

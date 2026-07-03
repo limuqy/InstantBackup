@@ -4,9 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
-#if MC_VER <= MC_1_16_5
-import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
-#endif
 import net.minecraftforge.forgespi.language.IModInfo;
 
 import java.nio.file.Files;
@@ -44,11 +41,7 @@ public class ForgeLoaderHelper implements LoaderHelper {
 #else
         return ModList.getModContainerById(ExampleMod.MOD_ID)
 #endif
-#if MC_VER <= MC_1_16_5
-            .map(container -> resolveModRootPath(((ModFileInfo) container.getModInfo().getOwningFile()).getFile().getFilePath()))
-#else
             .map(container -> resolveModRootPath(container.getModInfo().getOwningFile().getFile().getFilePath()))
-#endif
             .orElseThrow(() -> new IllegalStateException("找不到 Instant Backup mod 容器"));
     }
 

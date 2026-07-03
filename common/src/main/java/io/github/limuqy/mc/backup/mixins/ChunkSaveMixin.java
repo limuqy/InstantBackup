@@ -11,10 +11,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-#if MC_VER <= MC_1_17_1
-import java.io.File;
-#endif
 import java.nio.file.Path;
 import java.util.Locale;
 
@@ -25,23 +21,13 @@ import java.util.Locale;
 @Mixin(RegionFileStorage.class)
 public abstract class ChunkSaveMixin {
 
-#if MC_VER <= MC_1_17_1
-    @Shadow
-    @Final
-    private File folder;
-#else
     @Shadow
     @Final
     private Path folder;
-#endif
 
     @Inject(method = "write", at = @At("HEAD"))
     private void beforeChunkWrite(ChunkPos pos, CompoundTag tag, CallbackInfo ci) {
-#if MC_VER <= MC_1_17_1
-        onRegionWrite(folder.toPath(), pos);
-#else
         onRegionWrite(folder, pos);
-#endif
     }
 
     private static void onRegionWrite(Path folderPath, ChunkPos pos) {
