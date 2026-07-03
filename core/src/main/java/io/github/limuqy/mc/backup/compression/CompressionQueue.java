@@ -45,6 +45,10 @@ public class CompressionQueue {
             ModLog.info("[Instant Backup] 压缩已关闭，跳过压缩队列 worker");
             return;
         }
+        if (!BackupConfig.isCompressionAsync()) {
+            ModLog.info("[Instant Backup] 压缩为同步模式，跳过压缩队列 worker");
+            return;
+        }
         int threadCount = Math.max(1, BackupConfig.getCompressionThreads());
         workers = new Thread[threadCount];
         for (int i = 0; i < threadCount; i++) {

@@ -142,6 +142,7 @@ public class BackupEngine {
         }
 
         String versionName = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        long backupStartTime = System.currentTimeMillis();
 
         threadPool.submitTask(() -> {
             try {
@@ -176,15 +177,18 @@ public class BackupEngine {
                 dbManager.refreshVersionCompletion(versionId);
                 cleanOldVersions();
 
-                ModLog.info("[Instant Backup] 备份已创建: {} ({} 文件)", versionName, allFiles.size());
+                long elapsedMs = System.currentTimeMillis() - backupStartTime;
+                ModLog.info("[Instant Backup] 备份已创建: {} ({} 文件, 耗时 {} ms)", versionName, allFiles.size(), elapsedMs);
 
                 // 异步执行 migrate，迁移新增的 pending blobs
+                long postMigrateStartTime = System.currentTimeMillis();
                 threadPool.submitTask(() -> {
                     try {
                         int[] postMigrateStats = migrateAllPendingBlobs();
                         if (postMigrateStats[0] + postMigrateStats[1] > 0) {
-                            ModLog.info("[Instant Backup] 备份后自动迁移: 捕获 {} 个, 跳过 {} 个",
-                                postMigrateStats[0], postMigrateStats[1]);
+                            long postElapsedMs = System.currentTimeMillis() - postMigrateStartTime;
+                            ModLog.info("[Instant Backup] 备份后自动迁移: 捕获 {} 个, 跳过 {} 个, 耗时 {} ms",
+                                postMigrateStats[0], postMigrateStats[1], postElapsedMs);
                         }
                     } catch (Exception e) {
                         ModLog.error("[Instant Backup] 备份后自动迁移失败", e);
@@ -276,12 +280,20 @@ public class BackupEngine {
             ModLog.warn("[Instant Backup] 源文件不存在，跳过捕获: {}", blob.getFilePath());
             return;
         }
-        blobStore.captureToRaw(source, blob.getFilePath(), blob.getFileHash());
         pendingCaptureMap.remove(blob.getFilePath());
         if (BackupConfig.isCompressionEnabled()) {
-            dbManager.updateBlobState(blob.getBlobKey(), BlobState.STAGED, 0);
-            compressionQueue.enqueue(blob.getBlobKey());
+            if (BackupConfig.isCompressionAsync()) {
+                blobStore.captureToRaw(source, blob.getFilePath(), blob.getFileHash());
+                dbManager.updateBlobState(blob.getBlobKey(), BlobState.STAGED, 0);
+                compressionQueue.enqueue(blob.getBlobKey());
+            } else {
+                long storedSize = blobStore.captureAndCompressDirect(source, blob.getFilePath(), blob.getFileHash());
+                dbManager.updateBlobState(blob.getBlobKey(), BlobState.STORED, storedSize);
+                onBlobStored(blob.getBlobKey());
+                ModLog.debug("[Instant Backup] 同步压缩完成: {} ({} bytes)", blob.getFilePath(), storedSize);
+            }
         } else {
+            blobStore.captureToRaw(source, blob.getFilePath(), blob.getFileHash());
             long storedSize = blobStore.finalizeWithoutCompression(blob);
             dbManager.updateBlobState(blob.getBlobKey(), BlobState.STORED, storedSize);
             onBlobStored(blob.getBlobKey());
@@ -330,12 +342,16 @@ public class BackupEngine {
     }
 
     public OperationResult migrateVersionsOperation(int versionId) {
+        long startTime = System.currentTimeMillis();
         try {
             List<Integer> versionIds = dbManager.getVersionIdsUpTo(versionId);
             if (versionIds.isEmpty()) {
                 return OperationResult.fail(LangKeys.BACKUP_VERSION_NOT_EXISTS);
             }
             int[] stats = migratePendingBlobsForVersions(versionIds);
+            long elapsedMs = System.currentTimeMillis() - startTime;
+            ModLog.info("[Instant Backup] 迁移完成: 捕获 {} 个文件, 跳过 {} 个, 耗时 {} ms",
+                stats[0], stats[1], elapsedMs);
             if (stats[1] > 0) {
                 return OperationResult.ok(LangKeys.BACKUP_MIGRATE_DONE_WITH_SKIPPED, stats[0], stats[1]);
             }
@@ -389,6 +405,7 @@ public class BackupEngine {
     }
 
     public OperationResult deleteVersionOperation(String versionName) {
+        long startTime = System.currentTimeMillis();
         try {
             VersionInfo version = dbManager.getVersionByName(versionName);
             if (version == null) {
@@ -404,6 +421,8 @@ public class BackupEngine {
                 pendingCaptureMap.remove(blob.getFilePath(), blob.getBlobKey());
             }
 
+            long elapsedMs = System.currentTimeMillis() - startTime;
+            ModLog.info("[Instant Backup] 删除完成: {} (清理 {} 个 blob, 耗时 {} ms)", versionName, removed.size(), elapsedMs);
             return OperationResult.ok(LangKeys.BACKUP_DELETE_DONE, versionName);
         } catch (Exception e) {
             return OperationResult.fail(LangKeys.BACKUP_DELETE_FAILED, e.getMessage());
@@ -425,8 +444,10 @@ public class BackupEngine {
     }
 
     public OperationResult cleanAllBackupsOperation() {
+        long startTime = System.currentTimeMillis();
         try {
             List<VersionInfo> versions = dbManager.getAllVersions();
+            int versionCount = versions.size();
             for (VersionInfo version : versions) {
                 dbManager.deleteFilesByVersionId(version.getId());
                 dbManager.deleteVersion(version.getId());
@@ -442,7 +463,8 @@ public class BackupEngine {
             fileSizeCache.clear();
             pendingCaptureMap.clear();
 
-            ModLog.info("[Instant Backup] 已清理所有备份数据");
+            long elapsedMs = System.currentTimeMillis() - startTime;
+            ModLog.info("[Instant Backup] 已清理所有备份数据 ({} 个版本, 耗时 {} ms)", versionCount, elapsedMs);
             return OperationResult.ok(LangKeys.BACKUP_CLEAN_DONE, backupPath);
         } catch (Exception e) {
             ModLog.error("清理备份数据失败", e);
@@ -477,6 +499,7 @@ public class BackupEngine {
             Path exportFile = backupPath.resolve(exportFileName);
 
             threadPool.submitTask(() -> {
+                long exportStartTime = System.currentTimeMillis();
                 try {
                     List<FileInfo> files = dbManager.getFilesByVersionId(version.getId());
                     try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(exportFile))) {
@@ -496,7 +519,8 @@ public class BackupEngine {
                             zos.closeEntry();
                         }
                     }
-                    ModLog.info("[Instant Backup] 导出完成: {}", exportFile);
+                    long elapsedMs = System.currentTimeMillis() - exportStartTime;
+                    ModLog.info("[Instant Backup] 导出完成: {} ({} 文件, 耗时 {} ms)", exportFile, files.size(), elapsedMs);
                 } catch (Exception e) {
                     ModLog.error("[Instant Backup] 导出版本失败: {}", versionName, e);
                 }

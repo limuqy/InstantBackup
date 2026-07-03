@@ -18,8 +18,9 @@ public class BackupConfig {
     private static final boolean DEFAULT_ONLY_WHEN_PLAYERS_ONLINE = true;
     private static final boolean DEFAULT_EXCLUDE_CARPET_BOTS = true;
     private static final boolean DEFAULT_COMPRESSION_ENABLED = true;
-    private static final int DEFAULT_COMPRESSION_LEVEL = 19;
+    private static final int DEFAULT_COMPRESSION_LEVEL = 9;
     private static final int DEFAULT_COMPRESSION_THREADS = 2;
+    private static final boolean DEFAULT_COMPRESSION_ASYNC = false;
     private static final boolean DEFAULT_DEFERRED_CHUNK_MIGRATION = true;
     private static final boolean DEFAULT_CHUNK_FULL_HASH = false;
     private static final int DEFAULT_THREAD_COUNT = 2;
@@ -110,10 +111,15 @@ public class BackupConfig {
                 "\n" +
                 "# ZSTD 压缩等级（范围：1-22）\n" +
                 "# 异步压缩模式下推荐较高等级以换取更小体积\n" +
-                "compression.level=19\n" +
+                "compression.level=9\n" +
                 "\n" +
-                "# 压缩消费者线程数\n" +
-                "compression.threads=2\n" +
+                "# 是否异步压缩\n" +
+                "# true = 文件复制后加入队列异步压缩；false = 复制后立即同步压缩（默认）\n" +
+                "# 异步模式下迁移完成不等于压缩完成，同步模式下迁移即压缩\n" +
+                "compression.async=false\n" +
+                "\n" +
+                "# 压缩消费者线程数（仅 compression.async=true 时生效）\n" +
+                "compression.threads=16\n" +
                 "\n" +
                 "# -------------------------------------------\n" +
                 "# 性能设置\n" +
@@ -121,8 +127,7 @@ public class BackupConfig {
                 "\n" +
                 "# 备份线程池核心线程数\n" +
                 "# 增加此值可以加快备份速度，但会占用更多 CPU 资源\n" +
-                "# 建议值: CPU 核心数的一半，最小为 1\n" +
-                "thread.count=2\n" +
+                "thread.count=4\n" +
                 "\n" +
                 "# -------------------------------------------\n" +
                 "# 存储设置\n" +
@@ -194,6 +199,7 @@ public class BackupConfig {
         setDefault("chunk.full_hash", String.valueOf(DEFAULT_CHUNK_FULL_HASH));
         setDefault("compression.enabled", String.valueOf(DEFAULT_COMPRESSION_ENABLED));
         setDefault("compression.level", String.valueOf(DEFAULT_COMPRESSION_LEVEL));
+        setDefault("compression.async", String.valueOf(DEFAULT_COMPRESSION_ASYNC));
         setDefault("compression.threads", String.valueOf(DEFAULT_COMPRESSION_THREADS));
         setDefault("thread.count", String.valueOf(DEFAULT_THREAD_COUNT));
         setDefault("storage.max_versions", String.valueOf(DEFAULT_MAX_VERSIONS));
@@ -276,7 +282,10 @@ public class BackupConfig {
                 "# ZSTD 压缩等级（范围：1-22）\n" +
                 "compression.level=" + properties.getProperty("compression.level") + "\n" +
                 "\n" +
-                "# 压缩消费者线程数\n" +
+                "# 是否异步压缩\n" +
+                "compression.async=" + properties.getProperty("compression.async") + "\n" +
+                "\n" +
+                "# 压缩消费者线程数（仅异步模式生效）\n" +
                 "compression.threads=" + properties.getProperty("compression.threads") + "\n" +
                 "\n" +
                 "# -------------------------------------------\n" +
@@ -285,7 +294,6 @@ public class BackupConfig {
                 "\n" +
                 "# 备份线程池核心线程数\n" +
                 "# 增加此值可以加快备份速度，但会占用更多 CPU 资源\n" +
-                "# 建议值: CPU 核心数的一半，最小为 1\n" +
                 "thread.count=" + properties.getProperty("thread.count") + "\n" +
                 "\n" +
                 "# -------------------------------------------\n" +
@@ -374,6 +382,11 @@ public class BackupConfig {
     public static int getCompressionLevel() {
         String val = properties.getProperty("compression.level");
         return val != null ? Integer.parseInt(val) : DEFAULT_COMPRESSION_LEVEL;
+    }
+
+    public static boolean isCompressionAsync() {
+        String val = properties.getProperty("compression.async");
+        return val != null ? Boolean.parseBoolean(val) : DEFAULT_COMPRESSION_ASYNC;
     }
 
     public static boolean isDeferredChunkMigration() {

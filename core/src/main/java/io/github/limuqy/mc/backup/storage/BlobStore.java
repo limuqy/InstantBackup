@@ -52,6 +52,16 @@ public class BlobStore {
     }
 
     /**
+     * 直接从源文件流式压缩到目标位置（同步压缩模式，避免中间 raw 文件）
+     */
+    public long captureAndCompressDirect(Path sourceFile, String relativePath, String fileHash) throws IOException {
+        Path compressedPath = resolveCompressedPath(relativePath, fileHash);
+        Files.createDirectories(compressedPath.getParent());
+        ZstdCompressor.compressToPath(sourceFile, compressedPath, BackupConfig.getCompressionLevel());
+        return Files.size(compressedPath);
+    }
+
+    /**
      * 将 raw 压缩为 .zst 并删除 raw
      */
     public long compressRaw(BlobInfo blob) throws IOException {
