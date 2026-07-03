@@ -2,7 +2,7 @@
 
 ## 一、项目概述
 
-**极速备份**（Instant Backup）是一个 Minecraft 存档增量备份模组，采用多加载器架构（Fabric / Forge / NeoForge），从单一代码库构建多个 MC 锚点版本。支持 Minecraft **1.16.5 – 26.2**（10 个锚点，Loader 组合见 `versionProperties/<version>.properties` 中的 `builds_for`）。模组提供基于 blob 去重的增量备份、区块 Copy-on-Write（COW）保护、异步 ZSTD 压缩，以及游戏内命令、停服 CLI 与一键脚本等多种操作方式。
+**极速备份**（Instant Backup）是一个 Minecraft 存档增量备份模组，采用多加载器架构（Fabric / Forge / NeoForge），从单一代码库构建多个 MC 锚点版本。主线支持 Minecraft **1.18.2 – 26.2**（7 个锚点，Loader 组合见 `versionProperties/<version>.properties` 中的 `builds_for`）。模组提供基于 blob 去重的增量备份、区块 Copy-on-Write（COW）保护、异步 ZSTD 压缩，以及游戏内命令、停服 CLI 与一键脚本等多种操作方式。
 
 **实现状态图例：** ✅ 已实现 · ⚠️ 部分实现 · ❌ 未实现
 

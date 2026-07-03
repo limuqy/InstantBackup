@@ -298,7 +298,6 @@ public final class CliBootstrap {
             + "  list              列出备份版本\n"
             + "  delete <序号>     删除版本\n"
             + "  export <序号>     导出 ZIP\n"
-            + "  migrate <序号>    迁移 PENDING blob\n"
             + "  status            查看任务状态\n"
             + "  clean             清空所有备份数据\n"
             + "  help              显示帮助\n"

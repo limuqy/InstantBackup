@@ -92,6 +92,22 @@ public class NeoForgeLoaderHelper implements LoaderHelper {
     }
 
     @Override
+    public List<Path> getModClasspath() {
+        Path modPath = getModRootPath();
+        if (isModJar(modPath)) {
+            return List.of(modPath);
+        }
+        // Dev 模式：添加 core 模块的 classes 目录
+        List<Path> paths = new java.util.ArrayList<>();
+        paths.add(modPath);
+        Path coreClasses = modPath.resolve("../../../core/build/classes/java/main").normalize();
+        if (Files.isDirectory(coreClasses)) {
+            paths.add(coreClasses);
+        }
+        return paths;
+    }
+
+    @Override
     public void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         CommandRegistry.register(dispatcher);
     }

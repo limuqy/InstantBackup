@@ -102,7 +102,7 @@ public class ExampleMod {
         System.out.println("[Instant Backup] 世界路径: " + worldPath);
         System.out.println("[Instant Backup] 备份路径: " + backupPath);
 
-        ScriptGenerator.generate(configDir, loaderHelper.getModRootPath(), serverRoot);
+        ScriptGenerator.generate(configDir, loaderHelper.getModClasspath(), serverRoot);
     }
 
     /**

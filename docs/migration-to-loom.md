@@ -26,7 +26,7 @@ Unimined 在 dev 环境中无法正确处理 Fabric API 的 intermediary mixin r
 
 - `build.gradle`（根）— 插件声明：移除 unimined，添加 architectury-loom
 - `buildSrc/src/main/groovy/minecraft.gradle` — 改用 Loom API 配置 mappings
-- `buildSrc/src/main/groovy/root.gradle` — 调整 remapJar/downgradeJar 接线
+- `buildSrc/src/main/groovy/root.gradle` — 调整 remapJar 接线
 - `settings.gradle` — pluginManagement 仓库调整
 
 ### 小改
@@ -65,9 +65,9 @@ Unimined 在 dev 环境中无法正确处理 Fabric API 的 intermediary mixin r
 
 移除 `xyz.wagyourtail.unimined` 插件声明，添加 `dev.architectury.loom` version `1.10-SNAPSHOT` apply false。forgix 配置保持不变。
 
-### Step 8：调整 root.gradle 中 JVMDowngrader 接线
+### Step 8：调整 root.gradle 中 remapJar 接线
 
-`remapJar` → `downgradeJar` → `shadeDowngradedApi` 的 finalizedBy 链需要按 Loom 产出的 task 名重新接线。
+按 Loom 产出的 task 名调整 `remapJar` 相关 finalizedBy 链。
 
 ### Step 9：更新各模块 build.gradle 插件 id
 
@@ -75,7 +75,7 @@ Unimined 在 dev 环境中无法正确处理 Fabric API 的 intermediary mixin r
 
 ### Step 10：更新 settings.gradle
 
-确保 pluginManagement 仓库包含 `https://maven.architectury.dev/`（已存在）。暂保留 wagyourtail 仓库（Manifold/JVMDowngrader 仍需要），确认后再清理。
+确保 pluginManagement 仓库包含 `https://maven.architectury.dev/`（已存在）。迁移初期暂保留 wagyourtail 仓库供 Manifold 使用，后续如确认不再需要可再清理。
 
 ## 验证
 
@@ -101,5 +101,5 @@ Unimined 在 dev 环境中无法正确处理 Fabric API 的 intermediary mixin r
 ## 后续扩展（本次不实施）
 
 1. 验证 1.20.1 三 loader 全部通过后，逐版本验证其他 MC 版本
-2. 1.16.5 的 Forge 可能需要特殊处理（MCP mappings vs mojmap），届时再评估
+2. 旧版分支中的 1.16.5 Forge 可能需要特殊处理（MCP mappings vs mojmap），届时再评估
 3. 清理不再需要的 wagyourtail maven 仓库

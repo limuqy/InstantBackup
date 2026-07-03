@@ -10,7 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 在配置目录生成一键启动脚本，复用 mod JAR 运行交互式 CLI。
@@ -26,7 +28,7 @@ public final class ScriptGenerator {
     /**
      * 生成 Windows cmd 与 Unix shell 脚本（若 script.enabled 为 true）。
      */
-    public static void generate(Path configDir, Path modRootPath, Path serverDir) {
+    public static void generate(Path configDir, List<Path> classpathEntries, Path serverDir) {
         if (!BackupConfig.isScriptEnabled()) {
             return;
         }
@@ -34,14 +36,16 @@ public final class ScriptGenerator {
         try {
             Files.createDirectories(configDir);
             String javaBinary = resolveJavaBinary();
-            String modPath = modRootPath.toAbsolutePath().normalize().toString();
+            String classpath = classpathEntries.stream()
+                .map(p -> p.toAbsolutePath().normalize().toString())
+                .collect(Collectors.joining(isWindows() ? ";" : ":"));
             String serverPath = serverDir.toAbsolutePath().normalize().toString();
 
             Path cmdPath = configDir.resolve(CMD_FILE);
-            Files.write(cmdPath, buildCmdScript(javaBinary, modPath, serverPath).getBytes(StandardCharsets.UTF_8));
+            Files.write(cmdPath, buildCmdScript(javaBinary, classpath, serverPath).getBytes(StandardCharsets.UTF_8));
 
             Path shPath = configDir.resolve(SH_FILE);
-            Files.write(shPath, buildShScript(javaBinary, modPath, serverPath).getBytes(StandardCharsets.UTF_8));
+            Files.write(shPath, buildShScript(javaBinary, classpath, serverPath).getBytes(StandardCharsets.UTF_8));
             makeExecutable(shPath);
 
             ModLog.info("[Instant Backup] 已生成一键脚本: {}, {}", cmdPath, shPath);
@@ -59,17 +63,17 @@ public final class ScriptGenerator {
         return "java";
     }
 
-    private static String buildCmdScript(String javaBinary, String modPath, String serverDir) {
-        return "@echo off\n"
-            + "chcp 65001 >nul\n"
-            + "title 极速备份\n"
-            + "\"" + escapeCmd(javaBinary) + "\" -cp \"" + escapeCmd(modPath) + "\" " + MAIN_CLASS + " --server-dir \"" + escapeCmd(serverDir) + "\" --interactive\n"
-            + "pause\n";
+    private static String buildCmdScript(String javaBinary, String classpath, String serverDir) {
+        return "@echo off\r\n"
+            + "chcp 65001 >nul\r\n"
+            + "title 极速备份\r\n"
+            + "\"" + escapeCmd(javaBinary) + "\" -cp \"" + escapeCmd(classpath) + "\" " + MAIN_CLASS + " --server-dir \"" + escapeCmd(serverDir) + "\" --interactive\r\n"
+            + "pause\r\n";
     }
 
-    private static String buildShScript(String javaBinary, String modPath, String serverDir) {
+    private static String buildShScript(String javaBinary, String classpath, String serverDir) {
         return "#!/usr/bin/env bash\n"
-            + "exec '" + escapeSh(javaBinary) + "' -cp '" + escapeSh(modPath) + "' " + MAIN_CLASS + " --server-dir '" + escapeSh(serverDir) + "' --interactive\n";
+            + "exec '" + escapeSh(javaBinary) + "' -cp '" + escapeSh(classpath) + "' " + MAIN_CLASS + " --server-dir '" + escapeSh(serverDir) + "' --interactive\n";
     }
 
     private static String escapeCmd(String value) {

@@ -29,7 +29,6 @@ public class BackupCommandHandler {
             case "list": return listVersions();
             case "delete": return deleteVersion(args);
             case "export": return exportVersion(args);
-            case "migrate": return migrateVersions(args);
             case "status": return showStatus();
             case "config": return showConfig(args);
             case "clean": return cleanBackups();
@@ -95,17 +94,6 @@ public class BackupCommandHandler {
             return Messages.invalidIndex(args[1]);
         }
         return backupManager.exportVersion(version.getVersionName());
-    }
-
-    private static Component migrateVersions(String[] args) {
-        VersionInfo version = getVersionByIndex(args);
-        if (version == null) {
-            if (args.length < 2) {
-                return Messages.missingIndex("migrate");
-            }
-            return Messages.invalidIndex(args[1]);
-        }
-        return backupManager.migrateVersions(version.getId());
     }
 
     private static Component showStatus() {

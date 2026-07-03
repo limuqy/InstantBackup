@@ -35,6 +35,11 @@ public interface LoaderHelper {
     Path getModRootPath();
 
     /**
+     * 获取脚本使用的 classpath 列表（生产环境为 JAR，开发环境可能包含多个 classes 目录）
+     */
+    List<Path> getModClasspath();
+
+    /**
      * 获取已安装的 mod 列表
      *
      * @return mod 名称列表

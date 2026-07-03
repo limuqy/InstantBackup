@@ -12,7 +12,6 @@
   "instantbackup.command.help.line.list": "/backup list - List backup versions",
   "instantbackup.command.help.line.delete": "/backup delete <index> - Delete a version",
   "instantbackup.command.help.line.export": "/backup export <index> - Export a version ZIP (for manual rollback)",
-  "instantbackup.command.help.line.migrate": "/backup migrate <index> - Migrate pending blobs for this and earlier versions",
   "instantbackup.command.help.line.status": "/backup status - Show task status",
   "instantbackup.command.help.line.config": "/backup config [key] [value] - View or change config",
   "instantbackup.command.help.line.clean": "/backup clean - Delete all backup data (use with caution)",

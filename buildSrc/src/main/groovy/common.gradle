@@ -2,7 +2,6 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'xyz.wagyourtail.manifold'
-    id 'xyz.wagyourtail.jvmdowngrader'
 }
 
 version = "${mod_version}-${gradle.ext.minecraft_version}"
@@ -60,10 +59,6 @@ processResources {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
-
-jvmdg.downgradeTo = JavaVersion.toVersion(gradle.ext.java_version)
-downgradeJar.archiveClassifier.set(null)
-shadeDowngradedApi.archiveClassifier.set(null)
 
 tasks.withType(GenerateModuleMetadata).configureEach {
     enabled = false

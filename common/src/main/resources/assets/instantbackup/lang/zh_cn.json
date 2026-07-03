@@ -12,7 +12,6 @@
   "instantbackup.command.help.line.list": "/backup list - 查看备份版本列表",
   "instantbackup.command.help.line.delete": "/backup delete <序号> - 删除指定版本",
   "instantbackup.command.help.line.export": "/backup export <序号> - 导出指定版本 ZIP（可用于手动回档）",
-  "instantbackup.command.help.line.migrate": "/backup migrate <序号> - 封存指定版本及更早版本的待迁移文件",
   "instantbackup.command.help.line.status": "/backup status - 查看任务状态",
   "instantbackup.command.help.line.config": "/backup config [设置] [值] - 查看/修改配置",
   "instantbackup.command.help.line.clean": "/backup clean - 清理所有备份数据（慎用）",

@@ -20,7 +20,7 @@
 > 仓库地址：[github.com/limuqy/InstantBackup](https://github.com/limuqy/InstantBackup)
 
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.16.5–26.2-green.svg)](https://www.minecraft.net/)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.18.2–26.2-green.svg)](https://www.minecraft.net/)
 [![Loaders](https://img.shields.io/badge/Loaders-Fabric%20%7C%20Forge%20%7C%20NeoForge-orange.svg)](#支持的版本)
 
 ---
@@ -47,12 +47,9 @@
 
 | Minecraft | Java | Fabric | Forge | NeoForge |
 |-----------|:----:|:------:|:-----:|:--------:|
-| 1.16.5 | 8 | ✅ | ✅ | — |
-| 1.17.1 | 16 | ✅ | ✅ | — |
 | 1.18.2 | 17 | ✅ | ✅ | — |
 | 1.19.4 | 17 | ✅ | ✅ | — |
 | 1.20.1 | 17 | ✅ | ✅ | ✅ |
-| 1.20.4 | 21 | ✅ | ✅ | ✅ |
 | 1.20.6 | 21 | ✅ | ✅ | ✅ |
 | 1.21.4 | 21 | ✅ | ✅ | ✅ |
 | 1.21.11 | 21 | ✅ | ✅ | ✅ |

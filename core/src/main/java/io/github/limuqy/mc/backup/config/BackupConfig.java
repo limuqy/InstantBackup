@@ -27,6 +27,7 @@ public class BackupConfig {
     private static final String DEFAULT_STORAGE_PATH = "backups";
     private static final String DEFAULT_LANGUAGE = "zh_cn";
     private static final boolean DEFAULT_SCRIPT_ENABLED = true;
+    private static final String DEFAULT_RESTORE_SOURCE_DIR = "backups";
 
     // 元数据存储后端默认值
     private static final String DEFAULT_METADATA_TYPE = "csv";
@@ -199,6 +200,7 @@ public class BackupConfig {
         setDefault("storage.path", DEFAULT_STORAGE_PATH);
         setDefault("general.language", DEFAULT_LANGUAGE);
         setDefault("script.enabled", String.valueOf(DEFAULT_SCRIPT_ENABLED));
+        setDefault("script.restore_source_dir", DEFAULT_RESTORE_SOURCE_DIR);
         setDefault("storage.metadata.type", DEFAULT_METADATA_TYPE);
         setDefault("storage.mysql.host", DEFAULT_MYSQL_HOST);
         setDefault("storage.mysql.port", String.valueOf(DEFAULT_MYSQL_PORT));

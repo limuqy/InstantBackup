@@ -24,7 +24,6 @@ public final class Messages {
             ChatCompat.translatable(LangKeys.COMMAND_HELP_LINE_LIST),
             ChatCompat.translatable(LangKeys.COMMAND_HELP_LINE_DELETE),
             ChatCompat.translatable(LangKeys.COMMAND_HELP_LINE_EXPORT),
-            ChatCompat.translatable(LangKeys.COMMAND_HELP_LINE_MIGRATE),
             ChatCompat.translatable(LangKeys.COMMAND_HELP_LINE_STATUS),
             ChatCompat.translatable(LangKeys.COMMAND_HELP_LINE_CONFIG),
             ChatCompat.translatable(LangKeys.COMMAND_HELP_LINE_CLEAN)

@@ -43,12 +43,6 @@ public class CommandRegistry {
                         int index = IntegerArgumentType.getInteger(context, "index");
                         return executeCommand(context, "export", String.valueOf(index));
                     })))
-            .then(Commands.literal("migrate")
-                .then(Commands.argument("index", IntegerArgumentType.integer(1))
-                    .executes(context -> {
-                        int index = IntegerArgumentType.getInteger(context, "index");
-                        return executeCommand(context, "migrate", String.valueOf(index));
-                    })))
             .then(Commands.literal("status")
                 .executes(context -> executeCommand(context, "status")))
             .then(Commands.literal("config")

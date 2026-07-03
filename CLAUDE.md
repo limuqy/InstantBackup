@@ -36,7 +36,7 @@ powershell -File scripts/build-all.ps1 -Versions 1.20.1,26.2  # specific version
 powershell -File scripts/build-all.ps1 -Clean                  # clean before build
 ```
 
-Valid `mc_ver` anchors: `1.16.5`, `1.17.1`, `1.18.2`, `1.19.4`, `1.20.1`, `1.20.4`, `1.20.6`, `1.21.4`, `1.21.11`, `26.2` (see `versionProperties/`). Which loaders build for each version is controlled by `builds_for` in `versionProperties/<version>.properties` — not all loaders exist for all versions (e.g. 1.16.5 has no NeoForge).
+Valid `mc_ver` anchors: `1.18.2`, `1.19.4`, `1.20.1`, `1.20.6`, `1.21.4`, `1.21.11`, `26.2` (see `versionProperties/`). Which loaders build for each version is controlled by `builds_for` in `versionProperties/<version>.properties` — not all loaders exist for all versions (e.g. 1.18.2 has no NeoForge).
 
 Requires JDK 25+ (to compile for 26.2's Java 25 target). Gradle Wrapper is included.
 
@@ -130,7 +130,7 @@ Command registration is delegated uniformly to `CommandRegistry.register(dispatc
 
 ### Multi-version code (Manifold preprocessor)
 
-Version branching uses Manifold `#if` directives with constants generated into `build.properties` by `root.gradle` (e.g. `MC_1_20_1=4`, `MC_VER=4` when building with `-Pmc_ver=1.20.1`):
+Version branching uses Manifold `#if` directives with constants generated into `build.properties` by `root.gradle` (e.g. `MC_1_20_1=2`, `MC_VER=2` when building with `-Pmc_ver=1.20.1`):
 
 ```java
 #if MC_VER <= MC_1_18_2
@@ -153,12 +153,11 @@ Rules:
 
 ### Gradle plugin chain (buildSrc)
 
-`root.gradle` → `common.gradle` (Java + Manifold + JVMDowngrader + resource `${}` expansion) → `minecraft.gradle` (Unimined MC + MojMap) → `unimined-*.gradle` (per-loader deps + `runClient`/`runServer`).
+`root.gradle` → `common.gradle` (Java + Manifold + resource `${}` expansion) → `minecraft.gradle` (Loom + MojMap) → `unimined-*.gradle` (per-loader deps + `runClient`/`runServer`).
 
 - `settings.gradle` dynamically includes subprojects based on `builds_for` in `versionProperties/<version>.properties`
 - `common.gradle` expands `${version}`, `${mod_id}`, `${java_version}`, etc. in `pack.mcmeta`, `fabric.mod.json`, `META-INF/mods.toml`, `META-INF/neoforge.mods.toml`, and `*.mixins.json` — don't hardcode version strings in those files
 - **Forgix** merges multi-loader outputs into a single JAR per MC version when `builds_for` lists more than one loader
-- **JVMDowngrader** downgrades compiled bytecode to match `java_version` from the version properties (Java 8 for 1.16.5, Java 16 for 1.17.1, Java 17 for 1.18.2–1.21.11, Java 25 for 26.2)
 
 ### Metadata storage backends
 

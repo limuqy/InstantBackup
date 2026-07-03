@@ -23,7 +23,6 @@ public final class LangKeys {
     public static final String COMMAND_HELP_LINE_LIST = "instantbackup.command.help.line.list";
     public static final String COMMAND_HELP_LINE_DELETE = "instantbackup.command.help.line.delete";
     public static final String COMMAND_HELP_LINE_EXPORT = "instantbackup.command.help.line.export";
-    public static final String COMMAND_HELP_LINE_MIGRATE = "instantbackup.command.help.line.migrate";
     public static final String COMMAND_HELP_LINE_STATUS = "instantbackup.command.help.line.status";
     public static final String COMMAND_HELP_LINE_CONFIG = "instantbackup.command.help.line.config";
     public static final String COMMAND_HELP_LINE_CLEAN = "instantbackup.command.help.line.clean";

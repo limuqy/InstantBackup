@@ -33,8 +33,6 @@ public class BackupService {
                 return formatResult(deleteVersion(args));
             case "export":
                 return formatResult(exportVersion(args));
-            case "migrate":
-                return formatResult(migrateVersions(args));
             case "status":
                 return formatStatus();
             case "clean":
@@ -54,10 +52,6 @@ public class BackupService {
 
     public OperationResult exportVersion(String versionName) {
         return backupEngine.exportVersionOperation(versionName);
-    }
-
-    public OperationResult migrateVersions(int versionId) {
-        return backupEngine.migrateVersionsOperation(versionId);
     }
 
     public List<VersionInfo> getVersionList() {
@@ -117,17 +111,6 @@ public class BackupService {
         return exportVersion(version.getVersionName());
     }
 
-    private OperationResult migrateVersions(String[] args) {
-        VersionInfo version = getVersionByIndex(args);
-        if (version == null) {
-            if (args.length < 2) {
-                return OperationResult.fail(LangKeys.COMMAND_ERROR_MISSING_INDEX, "migrate");
-            }
-            return OperationResult.fail(LangKeys.COMMAND_ERROR_INVALID_INDEX, args[1]);
-        }
-        return migrateVersions(version.getId());
-    }
-
     private VersionInfo getVersionByIndex(String[] args) {
         if (args.length < 2) {
             return null;
@@ -161,7 +144,6 @@ public class BackupService {
             I18n.format(LangKeys.COMMAND_HELP_LINE_LIST),
             I18n.format(LangKeys.COMMAND_HELP_LINE_DELETE),
             I18n.format(LangKeys.COMMAND_HELP_LINE_EXPORT),
-            I18n.format(LangKeys.COMMAND_HELP_LINE_MIGRATE),
             I18n.format(LangKeys.COMMAND_HELP_LINE_STATUS),
             I18n.format(LangKeys.COMMAND_HELP_LINE_CONFIG),
             I18n.format(LangKeys.COMMAND_HELP_LINE_CLEAN)

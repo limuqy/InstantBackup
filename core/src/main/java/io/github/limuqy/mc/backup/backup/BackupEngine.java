@@ -177,6 +177,19 @@ public class BackupEngine {
                 cleanOldVersions();
 
                 ModLog.info("[Instant Backup] 备份已创建: {} ({} 文件)", versionName, allFiles.size());
+
+                // 异步执行 migrate，迁移新增的 pending blobs
+                threadPool.submitTask(() -> {
+                    try {
+                        int[] postMigrateStats = migrateAllPendingBlobs();
+                        if (postMigrateStats[0] + postMigrateStats[1] > 0) {
+                            ModLog.info("[Instant Backup] 备份后自动迁移: 捕获 {} 个, 跳过 {} 个",
+                                postMigrateStats[0], postMigrateStats[1]);
+                        }
+                    } catch (Exception e) {
+                        ModLog.error("[Instant Backup] 备份后自动迁移失败", e);
+                    }
+                });
             } catch (Throwable e) {
                 ModLog.error("[Instant Backup] 备份任务执行失败", e);
             } finally {
