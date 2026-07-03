@@ -1,61 +1,37 @@
 plugins {
+    id 'dev.architectury.loom'
     id 'common'
-    id 'xyz.wagyourtail.unimined'
 }
 
-unimined.minecraft(sourceSets.main, true) {
-    version gradle.ext.minecraft_version
+loom {
+    silentMojangMappingsLicense()
+}
 
-    mappings {
-        mojmap()
-    }
+dependencies {
+    minecraft "com.mojang:minecraft:${gradle.ext.minecraft_version}"
+    mappings loom.officialMojangMappings()
 }
 
 if (project.name == "common") return // Don't apply the code below to the common project
 
-def loaders = ((String) gradle.builds_for).split(",").collect { it.trim() }
-def useCombineWith = loaders.contains('neoforge')
-
-unimined.minecraft(sourceSets.main, true) {
-    // combineWith 仅在含 NeoForge 的版本启用，避免旧版 Forge 解析不存在的 minecraft_forge artifact
-    if (useCombineWith) {
-        combineWith project(":core"), project(":core").sourceSets.main
-        combineWith project(":common"), project(":common").sourceSets.main
-    }
-
-    mods.modImplementation {
-        mixinRemap {
-            enableBaseMixin()
-            enableMixinExtra()
-        }
-    }
+// loader 模块：合并 common/core 源码，随 loader jar 一起编译
+sourceSets.main {
+    java.srcDirs += project(':common').sourceSets.main.java.srcDirs
+    resources.srcDirs += project(':common').sourceSets.main.resources.srcDirs
 }
 
-// 1.20.1 以下（无 NeoForge）：手动合并 common/core，走经典 Forge Maven 坐标
-if (!useCombineWith) {
-    dependencies {
-        implementation(project(":common"))
-        implementation(project(":core"))
-    }
+dependencies {
+    implementation(project(":core"))
+}
 
-    tasks.withType(JavaCompile).configureEach {
-        if (name == "compileJava") {
-            source(project(":common").sourceSets.main.allSource)
-        }
-    }
-
-    tasks.named('jar').configure {
-        from(project(':core').sourceSets.main.output)
-    }
+tasks.named('jar').configure {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(project(':core').sourceSets.main.output)
+    from(project(':cli').sourceSets.main.output)
 }
 
 processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from project(":common").sourceSets.main.resources
     from project(":core").sourceSets.main.resources
-}
-
-tasks.named('jar').configure {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(project(':cli').sourceSets.main.output)
 }

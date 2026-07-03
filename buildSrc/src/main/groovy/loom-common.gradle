@@ -1,0 +1,4 @@
+plugins {
+    id 'minecraft'
+}
+// common 模块不需要额外的 loader 配置

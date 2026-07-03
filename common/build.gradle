@@ -1,8 +1,9 @@
 plugins {
-    id 'unimined-common'
+    id 'loom-common'
     id 'java-library'
 }
 
 dependencies {
     api project(':core')
+    compileOnly 'org.spongepowered:mixin:0.8.5'
 }

@@ -1,5 +1,5 @@
 plugins {
-    id 'unimined-neoforge'
+    id 'loom-neoforge'
 }
 
 configurations {

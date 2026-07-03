@@ -1,5 +1,5 @@
 plugins {
-    id 'unimined-fabric'
+    id 'loom-fabric'
 }
 
 dependencies {

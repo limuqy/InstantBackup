@@ -58,6 +58,9 @@ def loadVersionProperties() {
     props.load(new FileInputStream("$rootDir/versionProperties/${mcVersion}.properties"))
 
     props.each { key, value -> gradle.ext.set(key, value) }
+    if (settings.hasProperty('builds_for')) {
+        gradle.ext.builds_for = settings.builds_for
+    }
     gradle.ext.mcVers = mcVers
     gradle.ext.mcIndex = mcIndex
 }
@@ -80,6 +83,17 @@ include('core')
 include('cli')
 ((String) gradle.builds_for).split(",").each { loader ->
     include(loader.trim())
+}
+
+// Architectury Loom 在应用插件时读取 loom.platform。
+// 这里按子项目提前注入，避免全局 gradle.properties 只能选择单一 loader。
+gradle.beforeProject { project ->
+    if (project.name == 'fabric' || project.name == 'forge') {
+        project.ext.set('loom.platform', project.name)
+    } else if (project.name == 'neoforge') {
+        // 1.20.1 的 NeoForge 仍沿用 Forge userdev / SRG 管线，Loom 需按 forge 平台初始化。
+        project.ext.set('loom.platform', gradle.ext.minecraft_version == '1.20.1' ? 'forge' : 'neoforge')
+    }
 }
 
 rootProject.name = 'InstantBackup'

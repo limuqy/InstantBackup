@@ -1,5 +1,5 @@
 plugins {
-    id 'unimined-forge'
+    id 'loom-forge'
 }
 
 configurations {
