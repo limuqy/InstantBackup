@@ -11,7 +11,16 @@ repositories {
     mavenCentral()
 }
 
+// buildSrc 在 settings.gradle 之前求值，无法访问 gradle.ext，需要直接读取属性文件
+def rootProps = new Properties()
+rootProps.load(new FileInputStream(file('../gradle.properties')))
+def mcVer = rootProps.getProperty('mc_ver')
+
+def versionProps = new Properties()
+versionProps.load(new FileInputStream(file("../versionProperties/${mcVer}.properties")))
+def architecturyLoom = versionProps.getProperty('architectury_loom')
+
 dependencies {
-    implementation 'dev.architectury:architectury-loom:1.10-SNAPSHOT'
-    implementation 'org.apache.commons:commons-compress:1.28.0'
+    implementation "dev.architectury:architectury-loom:${architecturyLoom}"
+    implementation "org.apache.commons:commons-compress:1.28.0"
 }

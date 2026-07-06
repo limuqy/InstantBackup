@@ -4,7 +4,7 @@ plugins {
     id 'xyz.wagyourtail.manifold'
 }
 
-version = "${mod_version}-${gradle.ext.minecraft_version}"
+version = "${mod_version}-${gradle.ext.mc_version_range}"
 base {
     archivesName = "${mod_id}-${project == rootProject ? "" : project.name}"
 }

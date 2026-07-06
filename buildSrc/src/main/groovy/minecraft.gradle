@@ -14,15 +14,17 @@ dependencies {
 
 if (project.name == "common") return // Don't apply the code below to the common project
 
-// loader 模块：合并 common/core/cli 源码，随 loader jar 一起编译
-sourceSets.main {
-    java.srcDirs += project(':common').sourceSets.main.java.srcDirs
-    resources.srcDirs += project(':common').sourceSets.main.resources.srcDirs
-    java.srcDirs += project(':cli').sourceSets.main.java.srcDirs
-}
-
 dependencies {
     implementation(project(":core"))
+}
+
+// loader 模块：合并 common/core/cli 源码，随 loader jar 一起编译
+afterEvaluate {
+    sourceSets.main {
+        java.srcDirs += project(':common').sourceSets.main.java.srcDirs
+        resources.srcDirs += project(':common').sourceSets.main.resources.srcDirs
+        java.srcDirs += project(':cli').sourceSets.main.java.srcDirs
+    }
 }
 
 tasks.named('jar').configure {
